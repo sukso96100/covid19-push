@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"fmt"
+	"github.com/r3labs/sse"
 )
 
 type LastData struct {
@@ -26,8 +28,8 @@ type LastNews struct {
 var lData LastData = LastData{}
 var lNews LastNews = LastNews{}
 
-statTemplate := "{'confirmed':%d, 'confirmedDiff':%d, 'cured':%d, 'curedDiff':%d, 'death':%d, 'deathDiff':%d}"
-newsTemplate := "{'postId':%d, title: '%s', 'department':'%s'}"
+const statTemplate = "{'confirmed':%d, 'confirmedDiff':%d, 'cured':%d, 'curedDiff':%d, 'death':%d, 'deathDiff':%d}"
+const newsTemplate = "{'postId':%d, title: '%s', 'department':'%s'}"
 
 func Collect(w http.ResponseWriter, r *http.Request) {
 	if lData == (LastData{}) {
@@ -90,10 +92,10 @@ func collectData() {
 			}
 
 			newData.Create()
-			newStatData := fmt.Sprintf(statTemplate, 
-				current.Confirmed, current.Confirmed - lData.Confirmed,
-				current.Cured, current.Confirmed - lData.Cured,
-				current.Death, current.Death - lData.Death,
+			newStatData := fmt.Sprintf(statTemplate,
+				current.Confirmed, current.Confirmed-lData.Confirmed,
+				current.Cured, current.Confirmed-lData.Cured,
+				current.Death, current.Death-lData.Death,
 			)
 			Pusher.Publish("stat", &sse.Event{
 				Data: []byte(newStatData),

@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"os"
 
 	"github.com/r3labs/sse"
 )

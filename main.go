@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/r3labs/sse"
 )
 
 func main() {
