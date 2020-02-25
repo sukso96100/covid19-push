@@ -15,14 +15,13 @@ func main() {
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_CHARSET"))
 	if initErr != nil {
+		fmt.Println("DB Init Fail")
 		fmt.Printf("%w", initErr)
 	}
 	MigrateDb()
 	defer DbConn.Close()
 
 	InitPusher()
-	Pusher.CreateStream("stat")
-	Pusher.CreateStream("news")
 
 	defer Pusher.Close()
 
@@ -30,6 +29,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/updates", Pusher.HTTPHandler)
 	mux.HandleFunc("/collect", Collect)
+	fmt.Println("=====Server is now up and running=====")
 
 	http.ListenAndServe(":8080", mux)
 }

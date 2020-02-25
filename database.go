@@ -26,8 +26,7 @@ func InitDatabase(host string, database string,
 }
 
 func MigrateDb() {
-	DbConn.AutoMigrate(
-		&StatData{}, NewsData{})
+	DbConn.AutoMigrate(&StatData{}, NewsData{})
 }
 
 type StatData struct {

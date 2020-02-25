@@ -9,42 +9,24 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"fmt"
 	"github.com/r3labs/sse"
+	// "io/ioutil"
+	"strings"
 )
 
-type LastData struct {
-	Confirmed int
-	Cured     int
-	Death     int
-	UpdatedAt time.Time
-}
-
-type LastNews struct {
-	PostId     int
-	Title      string
-	Department string
-	UpdatedAt  time.Time
-}
-
-var lData LastData = LastData{}
-var lNews LastNews = LastNews{}
+var lData StatData = StatData{}
+var lNews NewsData = NewsData{}
 
 const statTemplate = "{'confirmed':%d, 'confirmedDiff':%d, 'cured':%d, 'curedDiff':%d, 'death':%d, 'deathDiff':%d}"
 const newsTemplate = "{'postId':%d, title: '%s', 'department':'%s'}"
 
 func Collect(w http.ResponseWriter, r *http.Request) {
-	if lData == (LastData{}) {
+	if lData == (StatData{}) {
 		data := GetLastStat()
-		lData.Confirmed = data.Confirmed
-		lData.Cured = data.Cured
-		lData.Death = data.Death
-		lData.UpdatedAt = data.UpdatedAt
+		lData = data
 	}
-	if lNews == (LastNews{}) {
+	if lNews == (NewsData{}) {
 		data := GetLastNews()
-		lNews.PostId = data.PostId
-		lNews.Title = data.Title
-		lNews.Department = data.Department
-		lNews.UpdatedAt = data.UpdatedAt
+		lNews = data
 	}
 	collectData()
 	w.WriteHeader(http.StatusOK)
@@ -52,6 +34,7 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 
 func collectData() {
 	if lData.UpdatedAt.Add(time.Minute * 1).Before(time.Now()) {
+		fmt.Println("Collecting data...")
 		// collect data
 		// Request the HTML page.
 		res, err := http.Get("http://ncov.mohw.go.kr/index_main.jsp")
@@ -63,15 +46,26 @@ func collectData() {
 			log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 		}
 
+		// if res.StatusCode == http.StatusOK {
+		// 	bodyBytes, err := ioutil.ReadAll(res.Body)
+		// 	if err != nil {
+		// 		log.Fatal(err)
+		// 	}
+		// 	// bodyString := string(bodyBytes)
+		// 	// fmt.Println(bodyString)
+		// }
+		
 		// Load the HTML document
 		doc, err := goquery.NewDocumentFromReader(res.Body)
 		if err != nil {
 			log.Fatal(err)
 		}
-		var current = LastData{}
+		var current = StatData{}
 		doc.Find("div.co_cur > ul > li").Each(func(i int, s *goquery.Selection) {
 			// For each item found, get the band and title
-			count, _ := strconv.Atoi(s.Find("a").Text())
+			raw := s.Find("a").Text()
+			count, _ := strconv.Atoi(strings.Split(raw, " ")[0])
+			fmt.Println(count)
 			switch i {
 			case 0:
 				current.Confirmed = count
@@ -84,14 +78,9 @@ func collectData() {
 		if lData.Confirmed != current.Confirmed ||
 			lData.Cured != current.Cured ||
 			lData.Death != current.Death {
+				fmt.Println("Notifying stat updates...")
 			// save and notify updates
-			newData := StatData{
-				Confirmed: current.Confirmed,
-				Cured:     current.Cured,
-				Death:     current.Death,
-			}
-
-			newData.Create()
+			current.Create()
 			newStatData := fmt.Sprintf(statTemplate,
 				current.Confirmed, current.Confirmed-lData.Confirmed,
 				current.Cured, current.Confirmed-lData.Cured,
@@ -102,6 +91,6 @@ func collectData() {
 			})
 		}
 
-		lData.UpdatedAt = time.Now()
+		lData = current
 	}
 }
