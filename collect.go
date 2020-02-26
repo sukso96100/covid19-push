@@ -6,9 +6,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/PuerkitoBio/goquery"
 	"fmt"
-	"github.com/r3labs/sse"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/alexandrevicenzi/go-sse"
+
 	// "io/ioutil"
 	"strings"
 )
@@ -20,6 +22,7 @@ const statTemplate = "{'confirmed':%d, 'confirmedDiff':%d, 'cured':%d, 'curedDif
 const newsTemplate = "{'postId':%d, title: '%s', 'department':'%s'}"
 
 func Collect(w http.ResponseWriter, r *http.Request) {
+	Pusher.SendMessage("/updates/stat", sse.SimpleMessage("ping"))
 	if lData == (StatData{}) {
 		data := GetLastStat()
 		lData = data
@@ -33,7 +36,7 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 }
 
 func collectData() {
-	if lData.UpdatedAt.Add(time.Minute * 1).Before(time.Now()) {
+	if lData.UpdatedAt.Add(time.Second * 1).Before(time.Now()) {
 		fmt.Println("Collecting data...")
 		// collect data
 		// Request the HTML page.
@@ -54,7 +57,7 @@ func collectData() {
 		// 	// bodyString := string(bodyBytes)
 		// 	// fmt.Println(bodyString)
 		// }
-		
+
 		// Load the HTML document
 		doc, err := goquery.NewDocumentFromReader(res.Body)
 		if err != nil {
@@ -78,7 +81,7 @@ func collectData() {
 		if lData.Confirmed != current.Confirmed ||
 			lData.Cured != current.Cured ||
 			lData.Death != current.Death {
-				fmt.Println("Notifying stat updates...")
+			fmt.Println("Notifying stat updates...")
 			// save and notify updates
 			current.Create()
 			newStatData := fmt.Sprintf(statTemplate,
@@ -86,9 +89,7 @@ func collectData() {
 				current.Cured, current.Confirmed-lData.Cured,
 				current.Death, current.Death-lData.Death,
 			)
-			Pusher.Publish("stat", &sse.Event{
-				Data: []byte(newStatData),
-			})
+			Pusher.SendMessage("/updates/stat", sse.SimpleMessage(newStatData))
 		}
 
 		lData = current

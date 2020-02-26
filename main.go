@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-
 )
 
 func main() {
@@ -23,12 +22,13 @@ func main() {
 
 	InitPusher()
 
-	defer Pusher.Close()
+	defer Pusher.Shutdown()
 
 	// Create a new Mux and set the handler
 	mux := http.NewServeMux()
-	mux.HandleFunc("/updates", Pusher.HTTPHandler)
+	mux.Handle("/updates/", Pusher)
 	mux.HandleFunc("/collect", Collect)
+	mux.Handle("/", http.FileServer(http.Dir("./static")))
 	fmt.Println("=====Server is now up and running=====")
 
 	http.ListenAndServe(":8080", mux)

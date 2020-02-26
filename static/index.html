@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SSE Examples</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="bulma.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main">
+    <h1 class="title">코로나19 알리미</h1>
+    <div class="box stat">
+        <div class="statitem">
+            <span>0</span>
+            <b>확진</b>
+        </div>
+        <div class="statitem">
+            <span>0</span>
+            <b>완치</b>
+        </div>
+        <div class="statitem">
+            <span>0</span>
+            <b>사망</b>
+        </div>
+    </div>
+    <strong>Messages</strong>
+    <br>
+    <div id="messages"></div>
+</div>
+    <script type="text/javascript">
+        e1 = new EventSource('/updates/stat');
+        e1.onmessage = function(event) {
+            document.getElementById('messages').innerHTML += 'Message on channel-1: ' + event.data + '<br>';
+        };
+
+        // e2 = new EventSource('/events/channel-2');
+        // e2.onmessage = function(event) {
+        //     document.getElementById('messages').innerHTML += 'Message on channel-2: ' + event.data + '<br>';
+        // };
+    </script>
+</body>
+</html>
