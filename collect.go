@@ -9,28 +9,20 @@ import (
 	"fmt"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/alexandrevicenzi/go-sse"
+	"github.com/sukso96100/covid19-push/database"
+	"github.com/sukso96100/covid19-push/fcm"
 
 	// "io/ioutil"
 	"strings"
 )
 
-var lData StatData = StatData{}
-var lNews NewsData = NewsData{}
+var lData database.StatData = database.StatData{}
+var lNews database.NewsData = database.NewsData{}
 
 const statTemplate = "{'confirmed':%d, 'confirmedDiff':%d, 'cured':%d, 'curedDiff':%d, 'death':%d, 'deathDiff':%d}"
 const newsTemplate = "{'postId':%d, title: '%s', 'department':'%s'}"
 
 func Collect(w http.ResponseWriter, r *http.Request) {
-	Pusher.SendMessage("/updates/stat", sse.SimpleMessage("ping"))
-	if lData == (StatData{}) {
-		data := GetLastStat()
-		lData = data
-	}
-	if lNews == (NewsData{}) {
-		data := GetLastNews()
-		lNews = data
-	}
 	collectData()
 	w.WriteHeader(http.StatusOK)
 }
@@ -63,7 +55,7 @@ func collectData() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		var current = StatData{}
+		var current = database.StatData{}
 		doc.Find("div.co_cur > ul > li").Each(func(i int, s *goquery.Selection) {
 			// For each item found, get the band and title
 			raw := s.Find("a").Text()
@@ -84,12 +76,13 @@ func collectData() {
 			fmt.Println("Notifying stat updates...")
 			// save and notify updates
 			current.Create()
-			newStatData := fmt.Sprintf(statTemplate,
-				current.Confirmed, current.Confirmed-lData.Confirmed,
-				current.Cured, current.Confirmed-lData.Cured,
-				current.Death, current.Death-lData.Death,
+			fcm.GetFCMApp().PushStatData(
+				current,
+				current.Confirmed-lData.Confirmed,
+				current.Confirmed-lData.Cured,
+				current.Death-lData.Death,
 			)
-			Pusher.SendMessage("/updates/stat", sse.SimpleMessage(newStatData))
+
 		}
 
 		lData = current

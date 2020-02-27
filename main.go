@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/sukso96100/covid19-push/database"
+	"github.com/sukso96100/covid19-push/fcm"
 )
 
 func main() {
-	initErr := InitDatabase(
+	initErr := database.InitDatabase(
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_DATABASE"),
 		os.Getenv("DB_USERNAME"),
@@ -17,16 +20,13 @@ func main() {
 		fmt.Println("DB Init Fail")
 		fmt.Printf("%w", initErr)
 	}
-	MigrateDb()
-	defer DbConn.Close()
+	database.MigrateDb()
+	defer database.DbConn.Close()
 
-	InitPusher()
-
-	defer Pusher.Shutdown()
+	fcm.InitFCMApp(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 
 	// Create a new Mux and set the handler
 	mux := http.NewServeMux()
-	mux.Handle("/updates/", Pusher)
 	mux.HandleFunc("/collect", Collect)
 	mux.Handle("/", http.FileServer(http.Dir("./static")))
 	fmt.Println("=====Server is now up and running=====")
