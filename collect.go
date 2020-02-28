@@ -11,6 +11,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/sukso96100/covid19-push/database"
 	"github.com/sukso96100/covid19-push/fcm"
+	"github.com/labstack/echo/v4"
 
 	// "io/ioutil"
 	"strings"
@@ -22,9 +23,10 @@ var lNews database.NewsData = database.NewsData{}
 const statTemplate = "{'confirmed':%d, 'confirmedDiff':%d, 'cured':%d, 'curedDiff':%d, 'death':%d, 'deathDiff':%d}"
 const newsTemplate = "{'postId':%d, title: '%s', 'department':'%s'}"
 
-func Collect(w http.ResponseWriter, r *http.Request) {
+func Collect(c echo.Context) error { {
 	collectData()
-	w.WriteHeader(http.StatusOK)
+	
+	return c.String(http.StatusOK, "OK")
 }
 
 func collectData() {
@@ -41,14 +43,6 @@ func collectData() {
 			log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 		}
 
-		// if res.StatusCode == http.StatusOK {
-		// 	bodyBytes, err := ioutil.ReadAll(res.Body)
-		// 	if err != nil {
-		// 		log.Fatal(err)
-		// 	}
-		// 	// bodyString := string(bodyBytes)
-		// 	// fmt.Println(bodyString)
-		// }
 
 		// Load the HTML document
 		doc, err := goquery.NewDocumentFromReader(res.Body)

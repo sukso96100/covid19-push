@@ -10,6 +10,7 @@ require (
 	github.com/alexandrevicenzi/go-sse v1.5.0
 	github.com/golang/protobuf v1.3.4 // indirect
 	github.com/jinzhu/gorm v1.9.12
+	github.com/labstack/echo/v4 v4.1.14
 	github.com/r3labs/sse v0.0.0-20200123123541-10c56e11168e
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
 	golang.org/x/tools v0.0.0-20200226224502-204d844ad48d // indirect

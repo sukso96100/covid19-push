@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
+	"github.com/labstack/echo/v4"
 	"github.com/sukso96100/covid19-push/database"
 	"github.com/sukso96100/covid19-push/fcm"
 )
@@ -25,11 +25,9 @@ func main() {
 
 	fcm.InitFCMApp(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 
-	// Create a new Mux and set the handler
-	mux := http.NewServeMux()
-	mux.HandleFunc("/collect", Collect)
-	mux.Handle("/", http.FileServer(http.Dir("./static")))
-	fmt.Println("=====Server is now up and running=====")
-
-	http.ListenAndServe(":8080", mux)
+	e := echo.New()
+	e.GET("/collect", Collect)
+	e.GET("/subscribe/:topic", Subscribe)
+	e.GET("/unsubscribe/:topic", Unubscribe)
+	e.Logger.Fatal(e.Start(":8080"))
 }
