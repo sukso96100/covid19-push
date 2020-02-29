@@ -27,7 +27,9 @@ func main() {
 
 	e := echo.New()
 	e.GET("/collect", Collect)
-	e.GET("/subscribe/:topic", Subscribe)
-	e.GET("/unsubscribe/:topic", Unubscribe)
+	e.POST("/subscribe/:topic", Subscribe)
+	e.POST("/unsubscribe/:topic", Unubscribe)
+	e.GET("/stat", CurrentStat)
+	e.GET("/news", RecentNews)
 	e.Logger.Fatal(e.Start(":8080"))
 }

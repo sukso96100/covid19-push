@@ -60,6 +60,12 @@ func GetLastNews() NewsData {
 	return result
 }
 
+func GetRecentNews() []NewsData {
+	result := []NewsData{}
+	DbConn.Limit(10).Find(&result)
+	return result
+}
+
 func (d NewsData) Create() {
 	DbConn.Create((&d))
 }
