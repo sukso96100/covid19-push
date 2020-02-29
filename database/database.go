@@ -41,6 +41,7 @@ type NewsData struct {
 	PostId     int
 	Title      string
 	Department string
+	Link       string
 }
 
 func GetLastStat() StatData {
