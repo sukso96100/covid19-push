@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import * as firebase from "firebase/app";
@@ -11,6 +11,8 @@ import {
   Link
 } from "react-router-dom";
 import Redirect from './redirect';
+import Button from '@material-ui/core/Button';
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyCJC0XNjwo_HUKpH1FwSxYQAxlF3O-Uzes",
@@ -50,6 +52,7 @@ export default function App() {
 }
 
 function Home() {
+  let [isSubscribed, setSubscribed] = useState(false)
   useEffect(()=>{
     messaging.onMessage((payload) => {
     console.log('Message received. ', payload);
@@ -63,27 +66,37 @@ function Home() {
         console.log('Unable to retrieve refreshed token ', err);
       });
     });
+    setSubscribed(tokenSaved())
   },[])
   const subscribe = async() => {
     let result = await Notification.requestPermission();
         if(result=="granted"){
           let token = await messaging.getToken();
-          
-
-          if(!tokenSaved()){
-            localForage.setItem("token", token)
-            localForage.setItem("tokenSent", "1")
-          }
+          localForage.setItem("token", token)
+          localForage.setItem("tokenSent", "1")
           subscribePush(token);
-          
+          setSubscribed(tokenSaved())
         }else{
           alert("알림 권한을 승인해야 알림을 수신할 수 있습니다.")
         }
   }
+  const unsubscribe = async()=>{
+    localForage.setItem("token", "")
+    localForage.setItem("tokenSent", "0")
+    let token = await messaging.getToken();
+    unsubscribePush(token);
+    setSubscribed(tokenSaved())
+  }
   return (
     <div class="main">
       <h1 class="title">코로나19 알리미</h1>
-      <button onClick={subscribe}>알림 받기</button>
+      {isSubscribed?(<p>알림 구독됨</p>):(<p>알림 구독 해제됨</p>)}
+      <Button variant="contained" color="primary" onClick={subscribe}>
+        알림 구독
+      </Button>
+      <Button variant="contained" color="primary" onClick={unsubscribe}>
+        구독 해제
+      </Button>
       <div class="box stat">
           <div class="statitem">
               <span>0</span>
@@ -108,7 +121,7 @@ function Home() {
 
 async function tokenSaved(){
   let token = await localForage.getItem("token");
-  return token != "";
+  return token == "1";
 }
 
 function subscribePush(token){
