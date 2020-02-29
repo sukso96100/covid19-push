@@ -3,6 +3,7 @@ package fcm
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"golang.org/x/net/context"
 
@@ -75,8 +76,11 @@ func (fcm *FCMObject) PushStatData(statData database.StatData,
 				statData.Death, deathIncSig),
 		},
 		Webpush: &messaging.WebpushConfig{
+			Notification: &messaging.WebpushNotification{
+				RequireInteraction: true,
+			},
 			FcmOptions: &messaging.WebpushFcmOptions{
-				Link: "http://ncov.mohw.go.kr/bdBoardList_Real.do",
+				Link: createNotificationUrl("http://ncov.mohw.go.kr/bdBoardList_Real.do"),
 			},
 		},
 		Topic: "stat",
@@ -89,4 +93,33 @@ func (fcm *FCMObject) PushStatData(statData database.StatData,
 	}
 	fmt.Println("Successfully sent stat message:", response)
 
+}
+
+func (fcm *FCMObject) PushNewsData(newsData database.NewsData) {
+	message := &messaging.Message{
+		Notification: &messaging.Notification{
+			Title: newsData.Title,
+			Body:  newsData.Department,
+		},
+		Webpush: &messaging.WebpushConfig{
+			Notification: &messaging.WebpushNotification{
+				RequireInteraction: true,
+			},
+			FcmOptions: &messaging.WebpushFcmOptions{
+				Link: createNotificationUrl(newsData.Link),
+			},
+		},
+		Topic: "news",
+	}
+	// Send a message to the devices subscribed to the provided topic.
+	response, err := fcm.MsgClient.Send(fcm.Ctx, message)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println("Successfully sent stat message:", response)
+}
+
+func createNotificationUrl(url string) string {
+	hostname := os.Getenv("APP_HOST")
+	return fmt.Sprintf("https://%s/redirect/%s", hostname, url)
 }
