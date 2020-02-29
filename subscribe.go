@@ -15,7 +15,7 @@ type Token struct {
 }
 
 func Subscribe(c echo.Context) error {
-	topic := c.QueryParam("topic")
+	topic := c.Param("topic")
 
 	if topic != "stat" && topic != "news" {
 		return c.String(http.StatusBadRequest, "That topic is not available")
@@ -38,8 +38,7 @@ func Subscribe(c echo.Context) error {
 }
 
 func Unubscribe(c echo.Context) error {
-	topic := c.QueryParam("topic")
-
+	topic := c.Param("topic")
 	if topic != "stat" && topic != "news" {
 		return c.String(http.StatusBadRequest, "That topic is not available")
 	}
