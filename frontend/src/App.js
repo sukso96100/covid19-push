@@ -4,6 +4,13 @@ import './App.css';
 import * as firebase from "firebase/app";
 import "firebase/messaging";
 import localForage from "localforage";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
+import Redirect from './redirect';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCJC0XNjwo_HUKpH1FwSxYQAxlF3O-Uzes",
@@ -20,8 +27,29 @@ const vapid = "BHLL-JhczA92RQd2uLIaAFEqICgVFapkcxaRsxUC_p2E_bfaftWKolfM7rgx2jxCH
 
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
-messaging.usePublicVapidKey(vapid);
-function App() {
+messaging.usePublicVapidKey(vapid); 
+
+export default function App() {
+  return (
+    <Router>
+      <div>
+
+        {/* A <Switch> looks through its children <Route>s and
+            renders the first one that matches the current URL. */}
+        <Switch>
+          <Route path="/redirect/:url">
+            <Redirect />
+          </Route>
+          <Route path="/">
+            <Home />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+function Home() {
   useEffect(()=>{
     messaging.onMessage((payload) => {
     console.log('Message received. ', payload);
@@ -77,7 +105,6 @@ function App() {
   );
 }
 
-export default App;
 
 async function tokenSaved(){
   let token = await localForage.getItem("token");
@@ -94,10 +121,28 @@ function subscribePush(token){
       'Content-Type': 'application/json'
     }
   })
+  fetch("/subscribe/news",{
+    method: 'POST', // or 'PUT'
+    body: JSON.stringify({
+      "token": token
+    }), // data can be `string` or {object}!
+    headers:{
+      'Content-Type': 'application/json'
+    }
+  })
 }
 
 function unsubscribePush(token){
   fetch("/unsubscribe/stat",{
+    method: 'POST', // or 'PUT'
+    body: JSON.stringify({
+      "token": token
+    }), // data can be `string` or {object}!
+    headers:{
+      'Content-Type': 'application/json'
+    }
+  })
+  fetch("/unsubscribe/news",{
     method: 'POST', // or 'PUT'
     body: JSON.stringify({
       "token": token
