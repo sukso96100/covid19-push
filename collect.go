@@ -19,7 +19,7 @@ import (
 
 func Collect(c echo.Context) error {
 	collectStat()
-
+	collectNews()
 	return c.String(http.StatusOK, "OK")
 }
 
@@ -79,10 +79,10 @@ func collectStat() {
 func collectNews() {
 	var lNews database.NewsData = database.GetLastNews()
 	if lNews.UpdatedAt.Add(time.Second * 1).Before(time.Now()) {
-		fmt.Println("Collecting stat data...")
+		fmt.Println("Collecting news data...")
 		// collect data
 		// Request the HTML page.
-		res, err := http.Get("http://ncov.mohw.go.kr/index_main.jsp")
+		res, err := http.Get("http://ncov.mohw.go.kr/tcmBoardList.do")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -100,24 +100,25 @@ func collectNews() {
 		// http://ncov.mohw.go.kr/tcmBoardView.do?ncvContSeq=353254&contSeq=353254&gubun=ALL
 		tds := doc.Find("tbody > tr").First().Find("td")
 
-		linkFunc := tds.Eq(1).Find("a").AttrOr("onclick","")
-		var newsLink string
+		linkFunc := tds.Eq(1).Find("a").AttrOr("onclick", "")
+		newsLink := "http://ncov.mohw.go.kr/tcmBoardList.do"
 		if linkFunc != "" {
 			tmpl := "http://ncov.mohw.go.kr/tcmBoardView.do?ncvContSeq=%s&contSeq=%s&gubun=ALL"
 			splits := strings.Split(linkFunc, ",")
-			newsLink := fmt.Sprintf(tmpl,splits[3],splits[3])
-		}else{
-			newsLink = "http://ncov.mohw.go.kr/tcmBoardList.do"
+			newsLink = fmt.Sprintf(tmpl, splits[3], splits[3])
 		}
+		postNum, _ := strconv.Atoi(tds.Eq(0).Text())
 		current := database.NewsData{
-			PostId: tds.Eq(0).Text(),
-			Title: tds.Eq(1).Find("a").Text(),
+			PostId:     postNum,
+			Title:      tds.Eq(1).Find("a").Text(),
 			Department: tds.Eq(2).Text(),
-			Link: newsLink,
+			Link:       newsLink,
 		}
-
-		if lNews.Link != current.Link {
+		fmt.Println(current.Title)
+		if lNews.PostId != current.PostId {
+			fmt.Println("Notifying news updates...")
 			current.Create()
-			fcm.GetFCMApp().
+			fcm.GetFCMApp().PushNewsData(current)
 		}
+	}
 }
