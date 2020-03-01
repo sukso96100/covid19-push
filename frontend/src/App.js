@@ -63,9 +63,6 @@ const useStyles = makeStyles({
 });
 
 
-firebase.initializeApp(firebaseConfig);
-const messaging = firebase.messaging();
-messaging.usePublicVapidKey(vapid); 
 
 export default function App() {
   return (
@@ -92,7 +89,17 @@ function Home() {
   let [isSubscribed, setSubscribed] = useState(false)
   let [statData, setStatData] = useState({confirmed:0, cured:0, death:0})
   let [newsData, setNewsData] = useState([])
+  let messaging;
   useEffect(()=>{
+    firebase.initializeApp(firebaseConfig);
+    messaging = firebase.messaging();
+    messaging.usePublicVapidKey(vapid); 
+
+    (async function(){
+      setSubscribed(await tokenSaved())
+      setStatData(await getStat())
+      setNewsData(await getNews())
+    })()
     messaging.onMessage((payload) => {
     console.log('Message received. ', payload);
             // ...
@@ -105,11 +112,6 @@ function Home() {
         console.log('Unable to retrieve refreshed token ', err);
       });
     });
-    (async function(){
-      setSubscribed(await tokenSaved())
-      setStatData(await getStat())
-      setNewsData(await getNews())
-    })()
   },[])
   const subscribe = async() => {
     let result = await Notification.requestPermission();
@@ -208,5 +210,5 @@ function Home() {
 
 async function tokenSaved(){
   let token = await localForage.getItem("token");
-  return token.length > 0 && token != undefined;
+  return token != undefined && token === "";
 }
