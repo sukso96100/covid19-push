@@ -31,5 +31,6 @@ func main() {
 	e.POST("/unsubscribe/:topic", Unubscribe)
 	e.GET("/stat", CurrentStat)
 	e.GET("/news", RecentNews)
+	e.Static("/", "static")
 	e.Logger.Fatal(e.Start(":8080"))
 }
