@@ -6,8 +6,10 @@ require (
 	cloud.google.com/go/firestore v1.1.1 // indirect
 	cloud.google.com/go/storage v1.6.0 // indirect
 	firebase.google.com/go v3.12.0+incompatible
+	github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20200226203936-887a30e53f59
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/alexandrevicenzi/go-sse v1.5.0
+	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.4 // indirect
 	github.com/jinzhu/gorm v1.9.12
 	github.com/labstack/echo/v4 v4.1.14

@@ -2,7 +2,10 @@ package database
 
 import (
 	"fmt"
+	"time"
 
+	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/mysql"
+	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
@@ -11,13 +14,23 @@ import (
 var DbConn *gorm.DB = nil
 
 // InitDatabase is a function that initializes database connection with provided connection information
-func InitDatabase(host string, database string,
+func InitDatabase(protocol string, host string, database string,
 	username string, password string,
 	charset string) error {
 	fmt.Println("Init db connection")
-	connInfo := fmt.Sprintf("%s:%s@(%s)/%s?charset=%s&parseTime=True&loc=UTC",
-		username, password, host, database, charset)
-	db, err := gorm.Open("mysql", connInfo)
+	config := mysql.Config{
+		User:   username,
+		Passwd: password,
+		Net:    protocol,
+		Addr:   host,
+		DBName: database,
+		Loc:    time.UTC,
+		Params: map[string]string{
+			"charset":   charset,
+			"parseTime": "True",
+		},
+	}
+	db, err := gorm.Open("mysql", config.FormatDSN())
 	if err != nil {
 		return err
 	}
