@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import './App.css';
 import * as firebase from "firebase/app";
 import "firebase/messaging";
 import localForage from "localforage";
@@ -8,7 +7,6 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
 } from "react-router-dom";
 import Redirect from './redirect';
 import Card from '@material-ui/core/Card';
@@ -21,20 +19,8 @@ import ListItem from '@material-ui/core/ListItem';
 import Divider from '@material-ui/core/Divider';
 import ListItemText from '@material-ui/core/ListItemText';
 import {subscribePush, unsubscribePush, getNews, getStat} from './api';
+import {firebaseConfig, vapidKey} from '../fcmconfig';
 
-
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCJC0XNjwo_HUKpH1FwSxYQAxlF3O-Uzes",
-  authDomain: "covid19-269505.firebaseapp.com",
-  databaseURL: "https://covid19-269505.firebaseio.com",
-  projectId: "covid19-269505",
-  storageBucket: "covid19-269505.appspot.com",
-  messagingSenderId: "649845923341",
-  appId: "1:649845923341:web:5dd4d71ca9ec0daa383f44",
-  measurementId: "G-KYQSGTFKNG"
-};
-const vapid = "BHLL-JhczA92RQd2uLIaAFEqICgVFapkcxaRsxUC_p2E_bfaftWKolfM7rgx2jxCH3IPbe3jRIbudxzf0frC5N0"
 
 const useStyles = makeStyles({
   root:{
@@ -93,7 +79,7 @@ function Home() {
   useEffect(()=>{
     firebase.initializeApp(firebaseConfig);
     messaging = firebase.messaging();
-    messaging.usePublicVapidKey(vapid); 
+    messaging.usePublicVapidKey(vapidKey); 
 
     (async function(){
       setSubscribed(await tokenSaved())
