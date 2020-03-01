@@ -21,7 +21,7 @@ RUN apt-get update && \
     apt-get autoremove -y && rm -rf /var/lib/{apt,dpkg,cache,log} && \
     mkdir /app
 
-COPY --from=frontend /build/static .
+COPY --from=frontend /build/static ./static
 COPY --from=backend /build/app .
 
 EXPOSE 8080
