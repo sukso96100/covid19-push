@@ -119,29 +119,28 @@ func (fcm *FCMObject) PushNewsData(newsData database.NewsData) {
 	fmt.Println("Successfully sent stat message:", response)
 }
 
-func SendConfirmNotification(token string, isSubscribe bool){
-	message := &messaging.Message{}
+func (fcm *FCMObject) SendConfirmNotification(token string, isSubscribe bool) {
+	message := messaging.Message{}
 	if isSubscribe {
-		*message.Notification = &messaging.Notification{
+		message.Notification = &messaging.Notification{
 			Title: "코로나19 알리미 구독 완료",
-			Body: "이제 질병관리본부 코로나19 홈페이지에서 발생 현황 변화와 새 공지사항을 푸시알림으로 알려드립니다."
+			Body:  "질병관리본부 코로나19 홈페이지에서 발생 현황 변화와 새 공지사항을 푸시알림으로 알려드립니다.",
 		}
-	}else{
-		*message.Notification = &messaging.Notification{
+	} else {
+		message.Notification = &messaging.Notification{
 			Title: "코로나19 알리미 구독 해제됨",
-			Body: "알림을 수신하지 않으려면 웹 브라우저에서 알림 권한을 차단하세요."
+			Body:  "알림을 수신하지 않으려면 웹 브라우저에서 알림 권한을 차단하세요.",
 		}
 	}
-	*message.Token = token 
+	message.Token = token
 
 	// Send a message to the devices subscribed to the provided topic.
-	response, err := fcm.MsgClient.Send(fcm.Ctx, message)
+	response, err := fcm.MsgClient.Send(fcm.Ctx, &message)
 	if err != nil {
 		log.Fatalln(err)
 	}
+	fmt.Println("Successfully sent confirm message:", response)
 }
-
-
 
 func createNotificationUrl(url string) string {
 	hostname := os.Getenv("APP_HOST")
