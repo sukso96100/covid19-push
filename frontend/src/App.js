@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import * as firebase from "firebase/app";
+  import * as firebase from "firebase/app";
 import "firebase/messaging";
 import localForage from "localforage";
 import {
@@ -19,7 +19,7 @@ import ListItem from '@material-ui/core/ListItem';
 import Divider from '@material-ui/core/Divider';
 import ListItemText from '@material-ui/core/ListItemText';
 import {subscribePush, unsubscribePush, getNews, getStat} from './api';
-import {firebaseConfig, vapidKey} from '../fcmconfig';
+import {firebaseConfig, vapidKey} from './fcmconfig';
 
 
 const useStyles = makeStyles({
