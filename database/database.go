@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"time"
 
 	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/mysql"
 	"github.com/go-sql-driver/mysql"
@@ -18,18 +17,17 @@ func InitDatabase(protocol string, host string, database string,
 	username string, password string,
 	charset string) error {
 	fmt.Println("Init db connection")
-	config := mysql.Config{
-		User:   username,
-		Passwd: password,
-		Net:    protocol,
-		Addr:   host,
-		DBName: database,
-		Loc:    time.UTC,
-		Params: map[string]string{
-			"charset":   charset,
-			"parseTime": "True",
-		},
+	config := mysql.NewConfig()
+	config.User = username
+	config.Passwd = password
+	config.Net = protocol
+	config.Addr = host
+	config.DBName = database
+	config.Params = map[string]string{
+		"charset":   charset,
+		"parseTime": "True",
 	}
+	fmt.Println(config.FormatDSN())
 	db, err := gorm.Open("mysql", config.FormatDSN())
 	if err != nil {
 		return err
