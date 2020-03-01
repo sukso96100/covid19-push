@@ -39,7 +39,9 @@ func main() {
 	e.POST("/unsubscribe/:topic", Unubscribe)
 	e.GET("/stat", CurrentStat)
 	e.GET("/news", RecentNews)
+	e.File("/redirect/*", "static/index.html")
 	e.File("/", "static/index.html")
+	//
 	e.Static("/", "static")
 	e.Logger.Fatal(e.Start(":8080"))
 }
