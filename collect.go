@@ -105,7 +105,8 @@ func collectNews() {
 		if linkFunc != "" {
 			tmpl := "http://ncov.mohw.go.kr/tcmBoardView.do?ncvContSeq=%s&contSeq=%s&gubun=ALL"
 			splits := strings.Split(linkFunc, ",")
-			newsLink = fmt.Sprintf(tmpl, splits[3], splits[3])
+			postNum := strings.ReplaceAll(splits[3], "'", "")
+			newsLink = fmt.Sprintf(tmpl, postNum, postNum)
 		}
 		postNum, _ := strconv.Atoi(tds.Eq(0).Text())
 		current := database.NewsData{
