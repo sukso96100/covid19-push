@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "코로나19알리미",
+  "name": "코로나19 알리미",
   "icons": [
     {
       "src": "favicon.ico",
