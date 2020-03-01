@@ -136,7 +136,8 @@ function Home() {
   return (
     <div className={classes.root}>
       <h1 class="title">코로나19 알리미</h1>
-      {isSubscribed==true?(<p>알림 구독됨</p>):(<p>알림 구독 해제됨</p>)}
+      <p>질병관리본부 코로나19 홈페이지에서 발생 동향과 새 공지사항을 푸시알림으로 알려드립니다.</p>
+      <b>Web Notification 기능을 지원하는 웹 브라우저에서 알림 권한 허용 후 이용 가능합니다.</b>
       <Button variant="contained" color="primary" className={classes.subBtns} onClick={subscribe}>
         알림 구독
       </Button>
