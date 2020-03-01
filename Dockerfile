@@ -3,7 +3,7 @@ FROM node:latest AS frontend
 RUN mkdir /build
 COPY ./ /build
 WORKDIR /build
-RUN npm i -g yarn && yarn install && yarn build && mv build static
+RUN cd frontend && yarn install && yarn build && mv build ../static
 
 FROM golang:1.14 AS backend
 
