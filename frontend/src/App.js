@@ -203,7 +203,8 @@ function Home() {
       </List>
       </CardContent>
       </Card>
-      
+      <a href="https://youngbin.xyz">개발자 개인 웹사이트 방문</a><br/>
+      <a href="mailto:sukso96100@gmail.com">개발자와 연락하기(이메일)</a>
   </div>
   );
 }
