@@ -29,7 +29,10 @@ func collectStat() {
 		fmt.Println("Collecting stat data...")
 		// collect data
 		// Request the HTML page.
-		res, err := http.Get("http://ncov.mohw.go.kr/index_main.jsp")
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", "http://ncov.mohw.go.kr/index_main.jsp", nil)
+		req.Close = true
+		res, err := client.Do(req)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -44,10 +47,10 @@ func collectStat() {
 			log.Fatal(err)
 		}
 		var current = database.StatData{
-            Confirmed: lData.Confirmed,
-            Cured: lData.Cured,
-            Death: lData.Death,
-        }
+			Confirmed: lData.Confirmed,
+			Cured:     lData.Cured,
+			Death:     lData.Death,
+		}
 		doc.Find("div.co_cur > ul > li").Each(func(i int, s *goquery.Selection) {
 			// For each item found, get the band and title
 			raw := s.Find("a").Text()
@@ -81,13 +84,19 @@ func collectStat() {
 }
 
 func collectNews() {
-    newsUrl := "http://ncov.mohw.go.kr/tcmBoardList.do?brdId=&brdGubun=&dataGubun=&ncvContSeq=&contSeq=&board_id="
 	var lNews database.NewsData = database.GetLastNews()
 	if lNews.UpdatedAt.Add(time.Second * 1).Before(time.Now()) {
 		fmt.Println("Collecting news data...")
 		// collect data
 		// Request the HTML page.
-		res, err := http.Get(newsUrl)
+		client := &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		}
+		req, err := http.NewRequest("GET", "http://ncov.mohw.go.kr/tcmBoardList.do?brdId=3", nil)
+		req.Close = true
+		res, err := client.Do(req)
 		if err != nil {
 			log.Fatal(err)
 		}
