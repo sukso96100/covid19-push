@@ -43,7 +43,11 @@ func collectStat() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		var current = database.StatData{}
+		var current = database.StatData{
+            Confirmed: lData.Confirmed,
+            Cured: lData.Cured,
+            Death: lData.Death,
+        }
 		doc.Find("div.co_cur > ul > li").Each(func(i int, s *goquery.Selection) {
 			// For each item found, get the band and title
 			raw := s.Find("a").Text()
@@ -77,12 +81,13 @@ func collectStat() {
 }
 
 func collectNews() {
+    newsUrl := "http://ncov.mohw.go.kr/tcmBoardList.do?brdId=&brdGubun=&dataGubun=&ncvContSeq=&contSeq=&board_id="
 	var lNews database.NewsData = database.GetLastNews()
 	if lNews.UpdatedAt.Add(time.Second * 1).Before(time.Now()) {
 		fmt.Println("Collecting news data...")
 		// collect data
 		// Request the HTML page.
-		res, err := http.Get("http://ncov.mohw.go.kr/tcmBoardList.do")
+		res, err := http.Get(newsUrl)
 		if err != nil {
 			log.Fatal(err)
 		}

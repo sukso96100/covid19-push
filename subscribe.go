@@ -33,7 +33,7 @@ func Subscribe(c echo.Context) error {
 		fmt.Printf("%w", err)
 		return c.String(http.StatusInternalServerError, "Subscribe Error")
 	}
-	fcmApp.SendConfirmNotification(token.Token, true)
+	fcmApp.SendConfirmNotification(token.Token, true, topic)
 	return c.String(http.StatusOK, fmt.Sprintf("Subscribed!: %d", response.SuccessCount))
 
 }
@@ -56,6 +56,6 @@ func Unubscribe(c echo.Context) error {
 		fmt.Printf("%w", err)
 		return c.String(http.StatusInternalServerError, "Unubscribe Error")
 	}
-	fcmApp.SendConfirmNotification(token.Token, false)
+	fcmApp.SendConfirmNotification(token.Token, false, topic)
 	return c.String(http.StatusOK, fmt.Sprintf("Subscribed!: %d", response.SuccessCount))
 }

@@ -119,23 +119,35 @@ func (fcm *FCMObject) PushNewsData(newsData database.NewsData) {
 	fmt.Println("Successfully sent stat message:", response)
 }
 
-func (fcm *FCMObject) SendConfirmNotification(token string, isSubscribe bool) {
-	message := messaging.Message{}
+func (fcm *FCMObject) SendConfirmNotification(token string, isSubscribe bool, topic string) {
+    var title string
+    var body string
+    var topicDisplay string
+    if topic == "stat" {
+        topicDisplay = "발생 현황"
+    }else if topic == "news" {
+        topicDisplay = "공지사항"
+    }
 	if isSubscribe {
-		message.Notification = &messaging.Notification{
-			Title: "코로나19 알리미 구독 완료",
-			Body:  "질병관리본부 코로나19 홈페이지에서 발생 현황 변화와 새 공지사항을 푸시알림으로 알려드립니다.",
-		}
+		title = "코로나19 알리미 구독 완료"
+		body = fmt.Sprintf(
+            "질병관리본부 코로나19 홈페이지의 %s을 푸시알림으로 알려드립니다.",
+            topicDisplay,
+        )
 	} else {
-		message.Notification = &messaging.Notification{
-			Title: "코로나19 알리미 구독 해제됨",
-			Body:  "알림을 수신하지 않으려면 웹 브라우저에서 알림 권한을 차단하세요.",
-		}
-	}
-	message.Token = token
+		title = fmt.Sprintf("코로나19 알리미 %s 구독 해제됨", topicDisplay)
+		body = "알림을 수신하지 않으려면 웹 브라우저에서 알림 권한을 차단하세요."
+    }
+    message := &messaging.Message{
+        Notification: &messaging.Notification{
+            Title: title,
+            Body: body,
+        },
+        Token: token,
+    }
 
 	// Send a message to the devices subscribed to the provided topic.
-	response, err := fcm.MsgClient.Send(fcm.Ctx, &message)
+	response, err := fcm.MsgClient.Send(fcm.Ctx, message)
 	if err != nil {
 		log.Fatalln(err)
 	}

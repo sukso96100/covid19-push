@@ -79,16 +79,19 @@ function Home() {
   let [isSubscribed, setSubscribed] = useState(false)
   let [statData, setStatData] = useState({confirmed:0, cured:0, death:0})
   let [newsData, setNewsData] = useState([])
-  let messaging;
   useEffect(()=>{
     (async function(){
       setSubscribed(await tokenSaved())
       setStatData(await getStat())
       setNewsData(await getNews())
     })()
-    messaging.onMessage((payload) => {
-    console.log('Message received. ', payload);
-            // ...
+    messaging.onMessage(async(payload) => {
+         const {title, ...options} = payload.notification;
+        navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification(title, options);
+        });
+        setStatData(await getStat())
+        setNewsData(await getNews())
     });
     messaging.onTokenRefresh(() => {
       messaging.getToken().then(async(refreshedToken) => {
@@ -123,7 +126,7 @@ function Home() {
     <div className={classes.root}>
       <h1 class="title">코로나19 알리미</h1>
       <p>질병관리본부 코로나19 홈페이지에서 발생 동향과 새 공지사항을 푸시알림으로 알려드립니다.</p>
-      <b>Web Notification 기능을 지원하는 웹 브라우저에서 알림 권한 허용 후 이용 가능합니다.</b>
+      <b>Web Notification 기능을 지원하는 웹 브라우저에서 알림 권한 허용 후 이용 가능합니다.</b><br/>
       <Button variant="contained" color="primary" className={classes.subBtns} onClick={subscribe}>
         알림 구독
       </Button>
