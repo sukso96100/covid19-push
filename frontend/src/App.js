@@ -70,6 +70,10 @@ export default function App() {
   );
 }
 
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+messaging.usePublicVapidKey(vapidKey); 
+
 function Home() {
   const classes = useStyles();
   let [isSubscribed, setSubscribed] = useState(false)
@@ -77,10 +81,6 @@ function Home() {
   let [newsData, setNewsData] = useState([])
   let messaging;
   useEffect(()=>{
-    firebase.initializeApp(firebaseConfig);
-    messaging = firebase.messaging();
-    messaging.usePublicVapidKey(vapidKey); 
-
     (async function(){
       setSubscribed(await tokenSaved())
       setStatData(await getStat())
