@@ -73,7 +73,7 @@ func GetLastNews() NewsData {
 
 func GetRecentNews() []NewsData {
 	result := []NewsData{}
-	DbConn.Limit(10).Find(&result)
+	DbConn.Order("id desc").Limit(10).Find(&result)
 	return result
 }
 
