@@ -54,7 +54,6 @@ export default function App() {
   return (
     <Router>
       <div>
-
         {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
         <Switch>
@@ -76,20 +75,16 @@ messaging.usePublicVapidKey(vapidKey);
 
 function Home() {
   const classes = useStyles();
-  let [isSubscribed, setSubscribed] = useState(false)
   let [statData, setStatData] = useState({confirmed:0, cured:0, death:0})
   let [newsData, setNewsData] = useState([])
   useEffect(()=>{
     (async function(){
-      setSubscribed(await tokenSaved())
       setStatData(await getStat())
       setNewsData(await getNews())
     })()
     messaging.onMessage(async(payload) => {
          const {title, ...options} = payload.notification;
-        navigator.serviceWorker.ready.then(registration => {
-            registration.showNotification(title, options);
-        });
+         new Notification(title, options);
         setStatData(await getStat())
         setNewsData(await getNews())
     });
@@ -109,7 +104,6 @@ function Home() {
           await localForage.setItem("token", token)
           await localForage.setItem("tokenSent", "1")
           subscribePush(token);
-          setSubscribed(await tokenSaved())
         }else{
           alert("알림 권한을 승인해야 알림을 수신할 수 있습니다.")
         }
@@ -120,13 +114,13 @@ function Home() {
     let token = await messaging.getToken();
     unsubscribePush(token);
     console.log(await tokenSaved())
-    setSubscribed(await tokenSaved())
   }
   return (
     <div className={classes.root}>
       <h1 class="title">코로나19 알리미</h1>
       <p>질병관리본부 코로나19 홈페이지에서 발생 동향과 새 공지사항을 푸시알림으로 알려드립니다.</p>
-      <b>Web Notification 기능을 지원하는 웹 브라우저에서 알림 권한 허용 후 이용 가능합니다.</b><br/>
+      <Available/>
+     <br/>
       <Button variant="contained" color="primary" className={classes.subBtns} onClick={subscribe}>
         알림 구독
       </Button>
@@ -160,7 +154,7 @@ function Home() {
     <Card className={classes.card}>
       <CardContent>
     <Typography color="textSecondary" gutterBottom>
-          질병관리본부 공지사항
+          질병관리본부 최근 공지사항
           </Typography>
     <List>
       {newsData.map((item, i)=>(
@@ -186,11 +180,14 @@ function Home() {
             }
           />
         </ListItem>
-        <Divider  component="li" />
+        <Divider component="li" />
         </div>
       ))}
       </List>
       </CardContent>
+      <CardActions>
+        <Button size="small" href="http://ncov.mohw.go.kr/tcmBoardList.do?brdId=3">더보기</Button>
+      </CardActions>
       </Card>
       <a href="https://youngbin.xyz">개발자 개인 웹사이트 방문</a><br/>
       <a href="mailto:sukso96100@gmail.com">개발자와 연락하기(이메일)</a>
@@ -202,4 +199,20 @@ function Home() {
 async function tokenSaved(){
   let token = await localForage.getItem("token");
   return token != undefined && token === "";
+}
+
+function Available(){
+  const [hasSW, setHasSW] = useState(true);
+  const [hasNoti, setHasNoti] = useState(true);
+  useEffect(()=>{
+    setHasSW('serviceWorker' in navigator)
+    setHasNoti("Notification" in window)
+  },[])
+  return(
+    <div>
+      {(!hasSW || !hasNoti)?(<b>웹 브라우저가 다음 기능을 제공하지 않아 알림 구독이 불가능합니다.<br/></b>):(<b></b>)}
+      {hasSW?(<b></b>):(<b>→ 서비스워커(Service Worker)<br/></b>)}
+      {hasNoti?(<b></b>):(<b>→ 웹 알림(Web Notification)<br/></b>)}
+    </div>
+  )
 }
