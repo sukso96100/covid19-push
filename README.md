@@ -34,7 +34,7 @@
 
 ## License
 
-Copyright 2020-Present Youngbin Han and all COVID19-Push project contributors
+Copyright 2020-Present Youngbin Han and all COVID19-Push project contributors  
 Licensed under MIT License
 
 Check [LICENSE](LICENSE) for more
