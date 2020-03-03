@@ -210,7 +210,8 @@ function Available(){
   },[])
   return(
     <div>
-      {(!hasSW || !hasNoti)?(<b>웹 브라우저가 다음 기능을 제공하지 않아 알림 구독이 불가능합니다.<br/></b>):(<b></b>)}
+      {(!hasSW || !hasNoti)?(<b>웹 브라우저가 다음 기능을 제공하지 않아 알림 구독이 불가능합니다.<br/></b>):(
+      <b>알림 권한 허용 후 이용해 주세요.</b>)}
       {hasSW?(<b></b>):(<b>→ 서비스워커(Service Worker)<br/></b>)}
       {hasNoti?(<b></b>):(<b>→ 웹 알림(Web Notification)<br/></b>)}
     </div>
