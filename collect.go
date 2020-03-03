@@ -22,16 +22,14 @@ import (
 
 func Collect(c echo.Context) error {
 	collectStat()
-	// collectNews()
+	collectNews()
 	return c.String(http.StatusOK, "OK")
 }
 
 func collectStat() {
 	lastStat := database.GetLastStat()
-	if lastStat.CreatedAt.Add(time.Second * 10).Before(time.Now()) {
-		opts := append(chromedp.DefaultExecAllocatorOptions[:],
-			chromedp.Flag("headless", false),
-		)
+	if lastStat.CreatedAt.Add(time.Second * 30).Before(time.Now()) {
+		opts := append(chromedp.DefaultExecAllocatorOptions[:]) // chromedp.Flag("headless", false),
 
 		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 		defer cancel()
@@ -87,43 +85,50 @@ func convertToInt(str string) int {
 }
 
 func collectNews() {
-	var lNews database.NewsData = database.GetLastNews()
-	if lNews.UpdatedAt.Add(time.Second * 1).Before(time.Now()) {
-		fmt.Println("Collecting news data...")
-		// collect data
-		// Request the HTML page.
-		client := &http.Client{
-			CheckRedirect: func(req *http.Request, via []*http.Request) error {
-				return http.ErrUseLastResponse
-			},
-		}
-		req, err := http.NewRequest("GET", "http://ncov.mohw.go.kr/tcmBoardList.do?brdId=3", nil)
-		req.Close = true
-		res, err := client.Do(req)
+	lastNews := database.GetLastNews()
+	if lastNews.UpdatedAt.Add(time.Second * 30).Before(time.Now()) {
+		opts := append(chromedp.DefaultExecAllocatorOptions[:]) // chromedp.Flag("headless", false),
+
+		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+		defer cancel()
+		contextVar, cancelFunc := chromedp.NewContext(
+			allocCtx,
+			chromedp.WithLogf(log.Printf),
+		)
+		defer cancelFunc()
+		var content string
+		err := chromedp.Run(contextVar,
+			chromedp.Navigate(`http://ncov.mohw.go.kr/tcmBoardList.do?brdId=3`),
+			chromedp.WaitVisible(`body`, chromedp.ByQuery),
+			chromedp.Sleep(time.Second*3),
+			chromedp.InnerHTML(`body`, &content, chromedp.ByQuery),
+		)
 		if err != nil {
-			log.Fatal(err)
-		}
-		defer res.Body.Close()
-		if res.StatusCode != 200 {
-			log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+			fmt.Println("%w", err)
 		}
 
 		// Load the HTML document
-		doc, err := goquery.NewDocumentFromReader(res.Body)
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(content))
 		if err != nil {
 			log.Fatal(err)
 		}
-		//fn_tcm_boardView('/tcmBoardView.do','','','353254','', 'ALL');
-		// http://ncov.mohw.go.kr/tcmBoardView.do?ncvContSeq=353254&contSeq=353254&gubun=ALL
+		//fn_tcm_boardView('/tcmBoardView.do','3','31','756','311', 'ALL');
+		//brdId=3&brdGubun=31&dataGubun=&ncvContSeq=756&contSeq=756&board_id=311&gubun=ALL
 		tds := doc.Find("tbody > tr").First().Find("td")
 
 		linkFunc := tds.Eq(1).Find("a").AttrOr("onclick", "")
 		newsLink := "http://ncov.mohw.go.kr/tcmBoardList.do"
 		if linkFunc != "" {
-			tmpl := "http://ncov.mohw.go.kr/tcmBoardView.do?ncvContSeq=%s&contSeq=%s&gubun=ALL"
-			splits := strings.Split(linkFunc, ",")
-			postNum := strings.ReplaceAll(splits[3], "'", "")
-			newsLink = fmt.Sprintf(tmpl, postNum, postNum)
+			tmpl := "http://ncov.mohw.go.kr/%s?brdId=%s&brdGubun=%s&dataGubun=&ncvContSeq=%s&contSeq=%s&board_id=%s&gubun=%s"
+			splits := strings.Split(strings.Split(strings.Split(linkFunc, "(")[1], ")")[0], ",")
+			newsLink = fmt.Sprintf(tmpl,
+				strings.ReplaceAll(splits[0], "'", ""),
+				strings.ReplaceAll(splits[1], "'", ""),
+				strings.ReplaceAll(splits[2], "'", ""),
+				strings.ReplaceAll(splits[3], "'", ""),
+				strings.ReplaceAll(splits[3], "'", ""),
+				strings.ReplaceAll(splits[4], "'", ""),
+				strings.ReplaceAll(splits[5], "'", ""))
 		}
 		postNum, _ := strconv.Atoi(tds.Eq(0).Text())
 		current := database.NewsData{
@@ -133,7 +138,7 @@ func collectNews() {
 			Link:       newsLink,
 		}
 		fmt.Println(current.Title)
-		if lNews.PostId != current.PostId {
+		if lastNews.PostId != current.PostId {
 			fmt.Println("Notifying news updates...")
 			current.Create()
 			fcm.GetFCMApp().PushNewsData(current)

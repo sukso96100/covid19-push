@@ -124,7 +124,7 @@ func (fcm *FCMObject) PushNewsData(newsData database.NewsData) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("Successfully sent stat message:", response)
+	fmt.Println("Successfully sent news message:", response)
 }
 
 func (fcm *FCMObject) SendConfirmNotification(token string, isSubscribe bool, topic string) {
