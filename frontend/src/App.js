@@ -242,11 +242,9 @@ function Home() {
         href="mailto:sukso96100@gmail.com">
         <AlternateEmailIcon fontSize="large" />
       </IconButton>
-      <IconButton className={classes.iconBtnsItem}
-        size="small" aria-label="close" color="inherit"
-        href="https://github.com/sukso96100/covid19-push">
-        <GitHubIcon fontSize="large" />
-      </IconButton>
+      <iframe className={classes.iconBtnsItem}
+      src="https://ghbtns.com/github-btn.html?user=sukso96100&repo=covid19-push&type=star&count=true&size=large"
+       frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
       </div>
       <Snackbar
         anchorOrigin={{
