@@ -1,6 +1,7 @@
 package fcm
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -163,5 +164,6 @@ func (fcm *FCMObject) SendConfirmNotification(token string, isSubscribe bool, to
 
 func createNotificationUrl(url string) string {
 	hostname := os.Getenv("APP_HOST")
-	return fmt.Sprintf("https://%s/redirect/%s", hostname, url)
+	return fmt.Sprintf("https://%s/redirect/%s",
+		hostname, base64.URLEncoding.EncodeToString([]byte(url)))
 }

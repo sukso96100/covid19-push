@@ -7,7 +7,7 @@ import {
 
 export default function Redirect(){
     let location = useLocation();
-    let url = location.pathname.replace("/redirect/","")
+    let url = decodeURI(location.pathname.replace("/redirect/",""))
     useEffect(()=>{
         window.open(url, '_blank');
     },[])
