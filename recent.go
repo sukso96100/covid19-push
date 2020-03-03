@@ -13,6 +13,7 @@ func CurrentStat(c echo.Context) error {
 		"confirmed": current.Confirmed,
 		"cured": current.Cured,
 		"death": current.Death,
+		"checking": current.Checking,
 	})
 }
 

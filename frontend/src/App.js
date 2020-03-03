@@ -75,7 +75,9 @@ messaging.usePublicVapidKey(vapidKey);
 
 function Home() {
   const classes = useStyles();
-  let [statData, setStatData] = useState({confirmed:0, cured:0, death:0})
+  let [statData, setStatData] = useState({
+    confirmed:0, cured:0, death:0, checking:0
+  })
   let [newsData, setNewsData] = useState([])
   useEffect(()=>{
     (async function(){
@@ -144,6 +146,14 @@ function Home() {
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.death}</Typography>
               <b>사망</b>
+          </div>
+          <div className={classes.statitem}>
+              <Typography variant="h5" component="h2">{statData.death}</Typography>
+              <b>사망</b>
+          </div>
+          <div className={classes.statitem}>
+              <Typography variant="h5" component="h2">{statData.checking}</Typography>
+              <b>검사진행</b>
           </div>
       </div>
       </CardContent>
