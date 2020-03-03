@@ -45,6 +45,7 @@ type StatData struct {
 	Confirmed int
 	Cured     int
 	Death     int
+	Checking  int
 }
 
 type NewsData struct {

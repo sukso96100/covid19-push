@@ -9,6 +9,8 @@ require (
 	github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20200226203936-887a30e53f59
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/alexandrevicenzi/go-sse v1.5.0
+	github.com/chromedp/cdproto v0.0.0-20200116234248-4da64dd111ac
+	github.com/chromedp/chromedp v0.5.3
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.4 // indirect
 	github.com/jinzhu/gorm v1.9.12

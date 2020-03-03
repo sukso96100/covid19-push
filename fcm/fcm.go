@@ -45,35 +45,42 @@ func (fcm *FCMObject) Init(credential string) {
 	fcm.MsgClient = client
 }
 
-func (fcm *FCMObject) PushStatData(statData database.StatData,
-	confirmedInc int, curedInc int, deathInc int) {
+func (fcm *FCMObject) PushStatData(prev database.StatData, current database.StatData) {
 	// See documentation on defining a message payload.
 	var confirmedIncSig string
 	var curedIncSig string
 	var deathIncSig string
-	if confirmedInc > 0 {
-		confirmedIncSig = fmt.Sprintf("+%d", confirmedInc)
+	var checkingIncSig string
+	if current.Confirmed-prev.Confirmed > 0 {
+		confirmedIncSig = fmt.Sprintf("+%d", current.Confirmed-prev.Confirmed)
 	} else {
-		confirmedIncSig = fmt.Sprintf("-%d", confirmedInc)
+		confirmedIncSig = fmt.Sprintf("%d", current.Confirmed-prev.Confirmed)
 	}
-	if curedInc > 0 {
-		curedIncSig = fmt.Sprintf("+%d", curedInc)
+	if current.Cured-prev.Cured > 0 {
+		curedIncSig = fmt.Sprintf("+%d", current.Cured-prev.Cured)
 	} else {
-		curedIncSig = fmt.Sprintf("-%d", curedInc)
+		curedIncSig = fmt.Sprintf("%d", current.Cured-prev.Cured)
 	}
-	if deathInc > 0 {
-		deathIncSig = fmt.Sprintf("+%d", deathInc)
+	if current.Death-prev.Death > 0 {
+		deathIncSig = fmt.Sprintf("+%d", current.Death-prev.Death)
 	} else {
-		deathIncSig = fmt.Sprintf("-%d", deathInc)
+		deathIncSig = fmt.Sprintf("%d", current.Death-prev.Death)
 	}
-	tmpl := "확진:%d명 (%s), 완치:%d(%s), 사망:%d(%s)"
+	if current.Checking-prev.Checking > 0 {
+		checkingIncSig = fmt.Sprintf("+%d", current.Checking-prev.Checking)
+	} else {
+		checkingIncSig = fmt.Sprintf("%d", current.Checking-prev.Checking)
+	}
+	tmpl := "확진:%d명 (%s), 완치:%d(%s), 사망:%d(%s), 검사진행:%d(%s)"
 	message := &messaging.Message{
 		Notification: &messaging.Notification{
 			Title: "코로나19 발생 현황",
 			Body: fmt.Sprintf(tmpl,
-				statData.Confirmed, confirmedIncSig,
-				statData.Cured, curedIncSig,
-				statData.Death, deathIncSig),
+				current.Confirmed, confirmedIncSig,
+				current.Cured, curedIncSig,
+				current.Death, deathIncSig,
+				current.Checking, checkingIncSig,
+			),
 		},
 		Webpush: &messaging.WebpushConfig{
 			Notification: &messaging.WebpushNotification{
@@ -120,31 +127,31 @@ func (fcm *FCMObject) PushNewsData(newsData database.NewsData) {
 }
 
 func (fcm *FCMObject) SendConfirmNotification(token string, isSubscribe bool, topic string) {
-    var title string
-    var body string
-    var topicDisplay string
-    if topic == "stat" {
-        topicDisplay = "발생 현황"
-    }else if topic == "news" {
-        topicDisplay = "공지사항"
-    }
+	var title string
+	var body string
+	var topicDisplay string
+	if topic == "stat" {
+		topicDisplay = "발생 현황"
+	} else if topic == "news" {
+		topicDisplay = "공지사항"
+	}
 	if isSubscribe {
 		title = "코로나19 알리미 구독 완료"
 		body = fmt.Sprintf(
-            "질병관리본부 코로나19 홈페이지의 %s을 푸시알림으로 알려드립니다.",
-            topicDisplay,
-        )
+			"질병관리본부 코로나19 홈페이지의 %s을 푸시알림으로 알려드립니다.",
+			topicDisplay,
+		)
 	} else {
 		title = fmt.Sprintf("코로나19 알리미 %s 구독 해제됨", topicDisplay)
 		body = "알림을 수신하지 않으려면 웹 브라우저에서 알림 권한을 차단하세요."
-    }
-    message := &messaging.Message{
-        Notification: &messaging.Notification{
-            Title: title,
-            Body: body,
-        },
-        Token: token,
-    }
+	}
+	message := &messaging.Message{
+		Notification: &messaging.Notification{
+			Title: title,
+			Body:  body,
+		},
+		Token: token,
+	}
 
 	// Send a message to the devices subscribed to the provided topic.
 	response, err := fcm.MsgClient.Send(fcm.Ctx, message)

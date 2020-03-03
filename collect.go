@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strconv"
@@ -15,72 +16,74 @@ import (
 
 	// "io/ioutil"
 	"strings"
+
+	"github.com/chromedp/chromedp"
 )
 
 func Collect(c echo.Context) error {
 	collectStat()
-	collectNews()
+	// collectNews()
 	return c.String(http.StatusOK, "OK")
 }
 
 func collectStat() {
-	var lData database.StatData = database.GetLastStat()
-	if lData.UpdatedAt.Add(time.Second * 1).Before(time.Now()) {
-		fmt.Println("Collecting stat data...")
-		// collect data
-		// Request the HTML page.
-		client := &http.Client{}
-		req, err := http.NewRequest("GET", "http://ncov.mohw.go.kr/index_main.jsp", nil)
-		req.Close = true
-		res, err := client.Do(req)
+	lastStat := database.GetLastStat()
+	if lastStat.CreatedAt.Add(time.Second * 10).Before(time.Now()) {
+		opts := append(chromedp.DefaultExecAllocatorOptions[:],
+			chromedp.Flag("headless", false),
+		)
+
+		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+		defer cancel()
+		contextVar, cancelFunc := chromedp.NewContext(
+			allocCtx,
+			chromedp.WithLogf(log.Printf),
+		)
+		defer cancelFunc()
+		var content string
+		err := chromedp.Run(contextVar,
+			chromedp.Navigate(`http://ncov.mohw.go.kr/bdBoardList_Real.do?brdId=1&brdGubun=11`),
+			chromedp.WaitVisible(`body`, chromedp.ByQuery),
+			chromedp.Sleep(time.Second*3),
+			chromedp.InnerHTML(`body`, &content, chromedp.ByQuery),
+		)
 		if err != nil {
-			log.Fatal(err)
-		}
-		defer res.Body.Close()
-		if res.StatusCode != 200 {
-			log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+			fmt.Println("%w", err)
 		}
 
-		// Load the HTML document
-		doc, err := goquery.NewDocumentFromReader(res.Body)
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(content))
 		if err != nil {
 			log.Fatal(err)
 		}
-		var current = database.StatData{
-			Confirmed: lData.Confirmed,
-			Cured:     lData.Cured,
-			Death:     lData.Death,
+
+		items := doc.Find("table").Eq(0).Find("tr")
+		current := database.StatData{
+			Confirmed: convertToInt(items.Eq(0).Find("td").Text()),
+			Cured:     convertToInt(items.Eq(1).Find("td").Text()),
+			Death:     convertToInt(items.Eq(2).Find("td").Text()),
+			Checking:  convertToInt(items.Eq(3).Find("td").Text()),
 		}
-		doc.Find("div.co_cur > ul > li").Each(func(i int, s *goquery.Selection) {
-			// For each item found, get the band and title
-			raw := s.Find("a").Text()
-			fmt.Println(raw)
-			count, _ := strconv.Atoi(strings.ReplaceAll(strings.Split(raw, " ")[0], ",", ""))
-			fmt.Println(count)
-			switch i {
-			case 0:
-				current.Confirmed = count
-			case 1:
-				current.Cured = count
-			case 2:
-				current.Death = count
-			}
-		})
-		if lData.Confirmed != current.Confirmed ||
-			lData.Cured != current.Cured ||
-			lData.Death != current.Death {
-			fmt.Println("Notifying stat updates...")
-			// save and notify updates
+		fmt.Println(items.Eq(0).Find("td").Text())
+		fmt.Println(convertToInt(items.Eq(0).Find("td").Text()))
+		if lastStat.Confirmed != current.Confirmed ||
+			lastStat.Cured != current.Cured ||
+			lastStat.Death != current.Death ||
+			lastStat.Checking != current.Checking {
+			fmt.Println("Sending new stat data")
 			current.Create()
 			fcm.GetFCMApp().PushStatData(
-				current,
-				current.Confirmed-lData.Confirmed,
-				current.Cured-lData.Cured,
-				current.Death-lData.Death,
+				lastStat, current,
 			)
-
 		}
 	}
+}
+
+func convertToInt(str string) int {
+	r1 := strings.Split(str, "명")[0]
+	r2 := strings.ReplaceAll(r1, ",", "")
+	result, _ := strconv.Atoi(strings.TrimSpace(r2))
+	fmt.Println(r1, r2, result)
+	return result
 }
 
 func collectNews() {
