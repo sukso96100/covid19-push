@@ -20,7 +20,9 @@ import Divider from '@material-ui/core/Divider';
 import ListItemText from '@material-ui/core/ListItemText';
 import {subscribePush, unsubscribePush, getNews, getStat} from './api';
 import {firebaseConfig, vapidKey} from './fcmconfig';
-
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles({
   root:{
@@ -75,7 +77,9 @@ messaging.usePublicVapidKey(vapidKey);
 
 function Home() {
   const classes = useStyles();
-  let [statData, setStatData] = useState({
+  const [snackbar, setSnackbar] = React.useState(false);
+  const [snackMsg, setSnackMsg] = React.useState('');
+  const [statData, setStatData] = useState({
     confirmed:0, cured:0, death:0, checking:0
   })
   let [newsData, setNewsData] = useState([])
@@ -85,11 +89,11 @@ function Home() {
       setNewsData(await getNews())
     })()
     messaging.onMessage(async(payload) => {
-         const {title, ...options} = payload.notification;
-         new Notification(title, options);
+      console.log('msg received')
         setStatData(await getStat())
         setNewsData(await getNews())
     });
+    
     messaging.onTokenRefresh(() => {
       messaging.getToken().then(async(refreshedToken) => {
         await localForage.setItem("token", refreshedToken)
@@ -99,23 +103,43 @@ function Home() {
       });
     });
   },[])
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar(false);
+  };
   const subscribe = async() => {
     let result = await Notification.requestPermission();
         if(result=="granted"){
           let token = await messaging.getToken();
           await localForage.setItem("token", token)
           await localForage.setItem("tokenSent", "1")
-          subscribePush(token);
+          let result = await subscribePush(token);
+          if(result){
+            setSnackMsg('알림 구독 완료.');
+          }else{
+            setSnackMsg('알림 구독중 오류가 발생했습니다.');
+          }
+          
+          setSnackbar(true);
         }else{
-          alert("알림 권한을 승인해야 알림을 수신할 수 있습니다.")
+          setSnackMsg('알림 권한을 허용해야 이용하실 수 있습니다.');
+          setSnackbar(true);
         }
   }
   const unsubscribe = async()=>{
     await localForage.setItem("token", "")
     await localForage.setItem("tokenSent", "0")
     let token = await messaging.getToken();
-    unsubscribePush(token);
-    console.log(await tokenSaved())
+    let result = await unsubscribePush(token);
+    if(result){
+      setSnackMsg('알림 구독 해제 완료.');
+    }else{
+      setSnackMsg('알림 구독 해제중 오류가 발생했습니다..');
+    }
+    setSnackbar(true);
   }
   return (
     <div className={classes.root}>
@@ -142,10 +166,6 @@ function Home() {
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.cured}</Typography>
               <b>완치</b>
-          </div>
-          <div className={classes.statitem}>
-              <Typography variant="h5" component="h2">{statData.death}</Typography>
-              <b>사망</b>
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.death}</Typography>
@@ -201,6 +221,23 @@ function Home() {
       </Card>
       <a href="https://youngbin.xyz">개발자 개인 웹사이트 방문</a><br/>
       <a href="mailto:sukso96100@gmail.com">개발자와 연락하기(이메일)</a>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={snackbar}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        message={snackMsg}
+        action={
+          <React.Fragment>
+            <IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </React.Fragment>
+        }
+      />
   </div>
   );
 }

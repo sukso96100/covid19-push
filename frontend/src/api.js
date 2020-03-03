@@ -8,8 +8,8 @@ export async function getNews(){
     return result.json()
 }
 
-export function subscribePush(token){
-    fetch("/subscribe/stat",{
+export async function subscribePush(token){
+    let r1 = await fetch("/subscribe/stat",{
       method: 'POST', // or 'PUT'
       body: JSON.stringify({
         "token": token
@@ -18,7 +18,7 @@ export function subscribePush(token){
         'Content-Type': 'application/json'
       }
     })
-    fetch("/subscribe/news",{
+    let r2 = await fetch("/subscribe/news",{
       method: 'POST', // or 'PUT'
       body: JSON.stringify({
         "token": token
@@ -27,10 +27,11 @@ export function subscribePush(token){
         'Content-Type': 'application/json'
       }
     })
+    return r1.ok && r2.ok
   }
   
-  export function unsubscribePush(token){
-    fetch("/unsubscribe/stat",{
+  export async function unsubscribePush(token){
+    let r1 = await fetch("/unsubscribe/stat",{
       method: 'POST', // or 'PUT'
       body: JSON.stringify({
         "token": token
@@ -39,7 +40,7 @@ export function subscribePush(token){
         'Content-Type': 'application/json'
       }
     })
-    fetch("/unsubscribe/news",{
+    let r2 = await fetch("/unsubscribe/news",{
       method: 'POST', // or 'PUT'
       body: JSON.stringify({
         "token": token
@@ -48,4 +49,5 @@ export function subscribePush(token){
         'Content-Type': 'application/json'
       }
     })
+    return r1.ok && r2.ok
   }
