@@ -23,6 +23,9 @@ import {firebaseConfig, vapidKey} from './fcmconfig';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import LanguageIcon from '@material-ui/icons/Language';
+import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
+import GitHubIcon from '@material-ui/icons/GitHub';
 
 const useStyles = makeStyles({
   root:{
@@ -47,6 +50,14 @@ const useStyles = makeStyles({
   },
   card:{
     margin: '8px'
+  },
+  iconBtns:{
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  iconBtnsItem:{
+    padding: '8px',
+    margin: '4px',
   }
 });
 
@@ -144,6 +155,7 @@ function Home() {
   return (
     <div className={classes.root}>
       <h1 class="title">코로나19 알리미</h1>
+      
       <p>질병관리본부 코로나19 홈페이지에서 발생 동향과 새 공지사항을 푸시알림으로 알려드립니다.</p>
       <Available/>
      <br/>
@@ -219,8 +231,23 @@ function Home() {
         <Button size="small" href="http://ncov.mohw.go.kr/tcmBoardList.do?brdId=3">더보기</Button>
       </CardActions>
       </Card>
-      <a href="https://youngbin.xyz">개발자 개인 웹사이트 방문</a><br/>
-      <a href="mailto:sukso96100@gmail.com">개발자와 연락하기(이메일)</a>
+      <div className={classes.iconBtns}>
+      <IconButton className={classes.iconBtnsItem}
+        size="small" aria-label="close" color="inherit"
+        href="https://youngbin.xyz">
+        <LanguageIcon fontSize="large" />
+      </IconButton>
+      <IconButton className={classes.iconBtnsItem}
+        size="small" aria-label="close" color="inherit"
+        href="mailto:sukso96100@gmail.com">
+        <AlternateEmailIcon fontSize="large" />
+      </IconButton>
+      <IconButton className={classes.iconBtnsItem}
+        size="small" aria-label="close" color="inherit"
+        href="https://github.com/sukso96100/covid19-push">
+        <GitHubIcon fontSize="large" />
+      </IconButton>
+      </div>
       <Snackbar
         anchorOrigin={{
           vertical: 'bottom',
