@@ -47,11 +47,10 @@ func (fcm *FCMObject) Init(credential string) {
 }
 
 func (fcm *FCMObject) PushStatData(prev database.StatData, current database.StatData) {
-	tmpl := "확진:%d명 (%s), 완치:%d(%s), 사망:%d(%s), 검사진행:%d(%s)"
 	message := &messaging.Message{
 		Notification: &messaging.Notification{
 			Title: "코로나19 발생 현황",
-			Body: database.CreateStatMsg(prev, current)
+			Body: database.CreateStatMsg(prev, current),
 		},
 		Webpush: &messaging.WebpushConfig{
 			Notification: &messaging.WebpushNotification{
