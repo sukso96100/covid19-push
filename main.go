@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/sukso96100/covid19-push/database"
 	"github.com/sukso96100/covid19-push/fcm"
+	"github.com/sukso96100/covid19-push/tgbot"
 )
 
 func main() {
@@ -32,6 +33,13 @@ func main() {
 	defer database.DbConn.Close()
 
 	fcm.InitFCMApp(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"))
+	err := tgbot.InitTgBot(
+		os.Getenv("TELEGRAM_TOKEN"),
+		os.Getenv("TELEGRAM_CHANNEL"))
+	if err != nil {
+		fmt.Println("Telegram Init Fail")
+		fmt.Printf("%w", initErr)
+	}
 
 	e := echo.New()
 	e.GET("/collect", Collect)

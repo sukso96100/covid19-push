@@ -13,10 +13,10 @@ type TgChanBot struct{
 } 
 var bot *TgChanBot 
 
-func InitTgBot(token string, channel string) {
+func InitTgBot(token string, channel string) error {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-
+		return err
 	}
 	bot = &TgChanBot{
 		Bot: bot,

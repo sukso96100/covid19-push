@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/sukso96100/covid19-push/database"
 	"github.com/sukso96100/covid19-push/fcm"
+	"github.com/sukso96100/covid19-push/tgbot"
 
 	// "io/ioutil"
 	"strings"
@@ -72,6 +73,7 @@ func collectStat() {
 			fcm.GetFCMApp().PushStatData(
 				lastStat, current,
 			)
+			tgbot.Bot().SendStatMsg(lastStat, current)
 		}
 	}
 }
@@ -142,6 +144,7 @@ func collectNews() {
 			fmt.Println("Notifying news updates...")
 			current.Create()
 			fcm.GetFCMApp().PushNewsData(current)
+			tgbot.Bot().SendNewsMsg(current)
 		}
 	}
 }
