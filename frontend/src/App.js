@@ -8,6 +8,7 @@ import {
   Switch,
   Route,
 } from "react-router-dom";
+import {CompatInfo, isSupported} from './compatCheck';
 import Redirect from './redirect';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -25,7 +26,6 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import LanguageIcon from '@material-ui/icons/Language';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
-import GitHubIcon from '@material-ui/icons/GitHub';
 
 const useStyles = makeStyles({
   root:{
@@ -83,8 +83,10 @@ export default function App() {
 }
 
 firebase.initializeApp(firebaseConfig);
-const messaging = firebase.messaging();
-messaging.usePublicVapidKey(vapidKey); 
+const messaging = isSupported() ? firebase.messaging() : null;
+if(isSupported()){
+  messaging.usePublicVapidKey(vapidKey); 
+}
 
 function Home() {
   const classes = useStyles();
@@ -99,20 +101,22 @@ function Home() {
       setStatData(await getStat())
       setNewsData(await getNews())
     })()
-    messaging.onMessage(async(payload) => {
-      console.log('msg received')
-        setStatData(await getStat())
-        setNewsData(await getNews())
-    });
-    
-    messaging.onTokenRefresh(() => {
-      messaging.getToken().then(async(refreshedToken) => {
-        await localForage.setItem("token", refreshedToken)
-        await localForage.setItem("tokenSent", "1")
-      }).catch((err) => {
-        console.log('Unable to retrieve refreshed token ', err);
+    if(isSupported()){
+      messaging.onMessage(async(payload) => {
+        console.log('msg received')
+          setStatData(await getStat())
+          setNewsData(await getNews())
       });
-    });
+      
+      messaging.onTokenRefresh(() => {
+        messaging.getToken().then(async(refreshedToken) => {
+          await localForage.setItem("token", refreshedToken)
+          await localForage.setItem("tokenSent", "1")
+        }).catch((err) => {
+          console.log('Unable to retrieve refreshed token ', err);
+        });
+      });
+    }
   },[])
 
   const handleClose = (event, reason) => {
@@ -122,42 +126,52 @@ function Home() {
     setSnackbar(false);
   };
   const subscribe = async() => {
-    let result = await Notification.requestPermission();
-        if(result=="granted"){
-          let token = await messaging.getToken();
-          await localForage.setItem("token", token)
-          await localForage.setItem("tokenSent", "1")
-          let result = await subscribePush(token);
-          if(result){
-            setSnackMsg('알림 구독 완료.');
-          }else{
-            setSnackMsg('알림 구독중 오류가 발생했습니다.');
-          }
-          
-          setSnackbar(true);
+    if(isSupported()){
+      let result = await Notification.requestPermission();
+      if(result=="granted"){
+        let token = await messaging.getToken();
+        await localForage.setItem("token", token)
+        await localForage.setItem("tokenSent", "1")
+        let result = await subscribePush(token);
+        if(result){
+          setSnackMsg('알림 구독 완료.');
         }else{
-          setSnackMsg('알림 권한을 허용해야 이용하실 수 있습니다.');
-          setSnackbar(true);
+          setSnackMsg('알림 구독중 오류가 발생했습니다.');
         }
+        
+        setSnackbar(true);
+      }else{
+        setSnackMsg('알림 권한을 허용해야 이용하실 수 있습니다.');
+        setSnackbar(true);
+      }
+    }else{
+      setSnackMsg('사용중인 웹 브라우저에서 이용하실 수 없습니다.');
+      setSnackbar(true);
+    }
   }
   const unsubscribe = async()=>{
-    await localForage.setItem("token", "")
-    await localForage.setItem("tokenSent", "0")
-    let token = await messaging.getToken();
-    let result = await unsubscribePush(token);
-    if(result){
-      setSnackMsg('알림 구독 해제 완료.');
+    if(isSupported()){
+      await localForage.setItem("token", "")
+      await localForage.setItem("tokenSent", "0")
+      let token = await messaging.getToken();
+      let result = await unsubscribePush(token);
+      if(result){
+        setSnackMsg('알림 구독 해제 완료.');
+      }else{
+        setSnackMsg('알림 구독 해제중 오류가 발생했습니다..');
+      }
+      setSnackbar(true);
     }else{
-      setSnackMsg('알림 구독 해제중 오류가 발생했습니다..');
+      setSnackMsg('사용중인 웹 브라우저에서 이용하실 수 없습니다.');
+      setSnackbar(true);
     }
-    setSnackbar(true);
   }
   return (
     <div className={classes.root}>
       <h1 class="title">코로나19 알리미</h1>
       
       <p>질병관리본부 코로나19 홈페이지에서 발생 동향과 새 공지사항을 푸시알림으로 알려드립니다.</p>
-      <Available/>
+      <CompatInfo/>
      <br/>
       <Button variant="contained" color="primary" className={classes.subBtns} onClick={subscribe}>
         알림 구독
@@ -273,19 +287,3 @@ async function tokenSaved(){
   return token != undefined && token === "";
 }
 
-function Available(){
-  const [hasSW, setHasSW] = useState(true);
-  const [hasNoti, setHasNoti] = useState(true);
-  useEffect(()=>{
-    setHasSW('serviceWorker' in navigator)
-    setHasNoti("Notification" in window)
-  },[])
-  return(
-    <div>
-      {(!hasSW || !hasNoti)?(<b>웹 브라우저가 다음 기능을 제공하지 않아 알림 구독이 불가능합니다.<br/></b>):(
-      <b>알림 권한 허용 후 이용해 주세요.</b>)}
-      {hasSW?(<b></b>):(<b>→ 서비스워커(Service Worker)<br/></b>)}
-      {hasNoti?(<b></b>):(<b>→ 웹 알림(Web Notification)<br/></b>)}
-    </div>
-  )
-}
