@@ -47,41 +47,11 @@ func (fcm *FCMObject) Init(credential string) {
 }
 
 func (fcm *FCMObject) PushStatData(prev database.StatData, current database.StatData) {
-	// See documentation on defining a message payload.
-	var confirmedIncSig string
-	var curedIncSig string
-	var deathIncSig string
-	var checkingIncSig string
-	if current.Confirmed-prev.Confirmed > 0 {
-		confirmedIncSig = fmt.Sprintf("+%d", current.Confirmed-prev.Confirmed)
-	} else {
-		confirmedIncSig = fmt.Sprintf("%d", current.Confirmed-prev.Confirmed)
-	}
-	if current.Cured-prev.Cured > 0 {
-		curedIncSig = fmt.Sprintf("+%d", current.Cured-prev.Cured)
-	} else {
-		curedIncSig = fmt.Sprintf("%d", current.Cured-prev.Cured)
-	}
-	if current.Death-prev.Death > 0 {
-		deathIncSig = fmt.Sprintf("+%d", current.Death-prev.Death)
-	} else {
-		deathIncSig = fmt.Sprintf("%d", current.Death-prev.Death)
-	}
-	if current.Checking-prev.Checking > 0 {
-		checkingIncSig = fmt.Sprintf("+%d", current.Checking-prev.Checking)
-	} else {
-		checkingIncSig = fmt.Sprintf("%d", current.Checking-prev.Checking)
-	}
 	tmpl := "확진:%d명 (%s), 완치:%d(%s), 사망:%d(%s), 검사진행:%d(%s)"
 	message := &messaging.Message{
 		Notification: &messaging.Notification{
 			Title: "코로나19 발생 현황",
-			Body: fmt.Sprintf(tmpl,
-				current.Confirmed, confirmedIncSig,
-				current.Cured, curedIncSig,
-				current.Death, deathIncSig,
-				current.Checking, checkingIncSig,
-			),
+			Body: database.CreateStatMsg(prev, current)
 		},
 		Webpush: &messaging.WebpushConfig{
 			Notification: &messaging.WebpushNotification{
