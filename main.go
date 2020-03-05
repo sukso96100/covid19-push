@@ -38,7 +38,7 @@ func main() {
 		os.Getenv("TELEGRAM_CHANNEL"))
 	if err != nil {
 		fmt.Println("Telegram Init Fail")
-		fmt.Printf("%w", initErr)
+		fmt.Printf("%w", err)
 	}
 
 	e := echo.New()
