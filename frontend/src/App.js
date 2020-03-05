@@ -173,11 +173,15 @@ function Home() {
       <p>질병관리본부 코로나19 홈페이지에서 발생 동향과 새 공지사항을 푸시알림으로 알려드립니다.</p>
       <CompatInfo/>
      <br/>
-      <Button variant="contained" color="primary" className={classes.subBtns} onClick={subscribe}>
+      <Button variant="outlined" color="primary" className={classes.subBtns} onClick={subscribe}>
         알림 구독
       </Button>
-      <Button variant="contained" color="primary" className={classes.subBtns} onClick={unsubscribe}>
+      <Button variant="outlined" color="primary" className={classes.subBtns} onClick={unsubscribe}>
         구독 해제
+      </Button>
+      <Button variant="outlined" color="primary" className={classes.subBtns}
+        href="https://t.me/covid19push">
+        Telegram 채널 구독
       </Button>
       <Card className={classes.card}>
       <CardContent>

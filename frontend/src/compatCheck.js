@@ -11,7 +11,10 @@ export function CompatInfo(){
     },[])
     return(
       <div>
-        {(!hasSW || !hasNoti)?(<b>웹 브라우저가 다음 기능을 제공하지 않아 알림 구독이 불가능합니다.<br/></b>):(
+        {(!hasSW || !hasNoti)?
+        (<b>
+          웹 브라우저가 다음 기능을 제공하지 않아 알림 구독이 불가능합니다.<br/>
+          Telegram 채널 구독을 대신 이용해 주세요<br/></b>):(
         <b>알림 권한 허용 후 이용해 주세요.</b>)}
         {hasSW?(<b></b>):(<b>→ 서비스워커(Service Worker)<br/></b>)}
         {hasNoti?(<b></b>):(<b>→ 웹 알림(Web Notification)<br/></b>)}
