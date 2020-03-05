@@ -2,8 +2,10 @@
 
 [질병관리본부의 코로나19 홈페이지](http://ncov.mohw.go.kr/)를 주기적으로 확인하여, 발생 현황에 변동이 있거나 새 공지사항이 있는 경우 푸시알림으로 알려주는 웹서비스 입니다.
 
-[서비스 이용하기](https://covid19push.youngbin.xyz)  
->서비스를 이용하려면, 서비스워커(Service Worker) 와 웹 알림(Web Notification)을 지원하는 웹 브라우저가 필요합니다.
+- [서비스 이용하기](https://covid19push.youngbin.xyz)  
+- [Telegram 채널 구독](https://t.me/covid19push)
+> 웹 푸시알림을 구독하려면 Service Worker, Web Push, Web Notification 사용 가능한 웹 브라우저가 필요합니다.
+> Telegram 채널을 통해서도 알림을 받아보실 수 있습니다.
 
 ## 서비스 구축에 사용된 기술
 
