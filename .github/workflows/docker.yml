@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Docker 이미지 빌드
-      run: docker build . --file Dockerfile --tag docker.pkg.github.com/sukso96100/covid19push/app:$(echo $GITHUB_REF | cut -d'/' -f 3)-${GITHUB_SHA:0:7}
+      run: docker build . --file Dockerfile --tag docker.pkg.github.com/sukso96100/covid19-push/app:$(echo $GITHUB_REF | cut -d'/' -f 3)-${GITHUB_SHA:0:7}
 
     - name: Docker 레지스트리에 로그인
       env:
@@ -22,4 +22,4 @@ jobs:
       run: echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY_URL --username $DOCKER_USERNAME --password-stdin
 
     - name: 레지스트리에 이미지 업로드
-      run: docker push docker.pkg.github.com/sukso96100/covid19push/app:$(echo $GITHUB_REF | cut -d'/' -f 3)-${GITHUB_SHA:0:7}
+      run: docker push docker.pkg.github.com/sukso96100/covid19-push/app:$(echo $GITHUB_REF | cut -d'/' -f 3)-${GITHUB_SHA:0:7}
