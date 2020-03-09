@@ -3,11 +3,8 @@ package database
 import (
 	"fmt"
 
-	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/mysql"
-	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	import _ "github.com/jinzhu/gorm/dialects/sqlite"
-
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 // conn is a singleton object that store db connection
