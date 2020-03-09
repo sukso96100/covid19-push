@@ -11,20 +11,15 @@ import (
 )
 
 func main() {
-	var dbHost string
-
-	if os.Getenv("DB_HOST") == "" {
-		dbHost = os.Getenv("CLOUD_SQL_CONNECTION_NAME")
-	} else {
-		dbHost = os.Getenv("DB_HOST")
-	}
 	initErr := database.InitDatabase(
-		os.Getenv("DB_PROTOCOL"),
-		dbHost,
-		os.Getenv("DB_NAME"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASS"),
-		os.Getenv("DB_CHARSET"))
+		// os.Getenv("DB_PROTOCOL"),
+		// dbHost,
+		// os.Getenv("DB_NAME"),
+		// os.Getenv("DB_USER"),
+		// os.Getenv("DB_PASS"),
+		// os.Getenv("DB_CHARSET"),
+		os.Getenv("DB_DSN"),
+	)
 	if initErr != nil {
 		fmt.Println("DB Init Fail")
 		fmt.Printf("%w", initErr)
