@@ -62,10 +62,6 @@ const useStyles = makeStyles({
   }
 });
 
-firebase.initializeApp(firebaseConfig);
-const messaging = isSupported() ? firebase.messaging() : null;
-const analytics = firebase.analytics();
-
 export default function App() {
   return (
     <Router>
@@ -84,6 +80,10 @@ export default function App() {
     </Router>
   );
 }
+
+firebase.initializeApp(firebaseConfig);
+const messaging = isSupported() ? firebase.messaging() : null;
+const analytics = firebase.analytics();
 
 if(isSupported()){
   messaging.usePublicVapidKey(vapidKey); 
