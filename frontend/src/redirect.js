@@ -4,17 +4,13 @@ import {
     Link,
     useLocation
 } from "react-router-dom";
-import * as firebase from "firebase/app";
-import {firebaseConfig} from "./fcmconfig";
 
-firebase.initializeApp(firebaseConfig);
-const analytics = firebase.analytics();
 export default function Redirect(props){
     let location = useLocation();
     let url = atob(location.pathname.replace("/redirect/",""))
     useEffect(()=>{
         window.open(url, '_blank');
-        analytics.logEvent('notification_clicked', {link: url});
+        props.ga.logEvent('notification_clicked', {link: url});
     },[])
     return (
         <div>

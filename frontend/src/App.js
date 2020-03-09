@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-  import * as firebase from "firebase/app";
+import * as firebase from "firebase/app";
+import 'firebase/analytics';
 import "firebase/messaging";
 import localForage from "localforage";
 import {
@@ -70,7 +71,7 @@ export default function App() {
             renders the first one that matches the current URL. */}
         <Switch>
           <Route path="/redirect/:url">
-            <Redirect/>
+            <Redirect ga={analytics}/>
           </Route>
           <Route path="/">
             <Home/>
