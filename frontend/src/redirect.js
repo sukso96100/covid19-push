@@ -5,11 +5,12 @@ import {
     useLocation
 } from "react-router-dom";
 
-export default function Redirect(){
+export default function Redirect(props){
     let location = useLocation();
     let url = atob(location.pathname.replace("/redirect/",""))
     useEffect(()=>{
         window.open(url, '_blank');
+        props.ga.logEvent('notification_clicked', {link: url});
     },[])
     return (
         <div>

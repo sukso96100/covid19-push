@@ -27,6 +27,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import LanguageIcon from '@material-ui/icons/Language';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
 
+
 const useStyles = makeStyles({
   root:{
     padding: '16px'
@@ -61,7 +62,9 @@ const useStyles = makeStyles({
   }
 });
 
-
+firebase.initializeApp(firebaseConfig);
+const messaging = isSupported() ? firebase.messaging() : null;
+const analytics = firebase.analytics();
 
 export default function App() {
   return (
@@ -71,10 +74,10 @@ export default function App() {
             renders the first one that matches the current URL. */}
         <Switch>
           <Route path="/redirect/:url">
-            <Redirect />
+            <Redirect ga={analytics}/>
           </Route>
           <Route path="/">
-            <Home />
+            <Home ga={analytics}/>
           </Route>
         </Switch>
       </div>
@@ -82,13 +85,11 @@ export default function App() {
   );
 }
 
-firebase.initializeApp(firebaseConfig);
-const messaging = isSupported() ? firebase.messaging() : null;
 if(isSupported()){
   messaging.usePublicVapidKey(vapidKey); 
 }
 
-function Home() {
+function Home(props) {
   const classes = useStyles();
   const [snackbar, setSnackbar] = React.useState(false);
   const [snackMsg, setSnackMsg] = React.useState('');
@@ -97,6 +98,8 @@ function Home() {
   })
   let [newsData, setNewsData] = useState([])
   useEffect(()=>{
+    props.ga.logEvent('open_homepage');
+
     (async function(){
       setStatData(await getStat())
       setNewsData(await getNews())
@@ -135,18 +138,22 @@ function Home() {
         let result = await subscribePush(token);
         if(result){
           setSnackMsg('알림 구독 완료.');
+          props.ga.logEvent('subscribe', {result: 'ok'});
         }else{
           setSnackMsg('알림 구독중 오류가 발생했습니다.');
+          props.ga.logEvent('subscribe', {result: 'error'});
         }
         
         setSnackbar(true);
       }else{
         setSnackMsg('알림 권한을 허용해야 이용하실 수 있습니다.');
         setSnackbar(true);
+        props.ga.logEvent('subscribe', {result: 'no_permission'});
       }
     }else{
       setSnackMsg('사용중인 웹 브라우저에서 이용하실 수 없습니다.');
       setSnackbar(true);
+      props.ga.logEvent('subscribe', {result: 'unsuported'});
     }
   }
   const unsubscribe = async()=>{
@@ -157,13 +164,16 @@ function Home() {
       let result = await unsubscribePush(token);
       if(result){
         setSnackMsg('알림 구독 해제 완료.');
+        props.ga.logEvent('unsubscribe', {result: 'ok'});
       }else{
         setSnackMsg('알림 구독 해제중 오류가 발생했습니다..');
+        props.ga.logEvent('unsubscribe', {result: 'error'});
       }
       setSnackbar(true);
     }else{
       setSnackMsg('사용중인 웹 브라우저에서 이용하실 수 없습니다.');
       setSnackbar(true);
+      props.ga.logEvent('subscribe', {result: 'unsupported'});
     }
   }
   return (
@@ -180,7 +190,10 @@ function Home() {
         구독 해제
       </Button>
       <Button variant="outlined" color="primary" className={classes.subBtns}
-        href="https://t.me/covid19push">
+        onCliek={()=>{
+          window.open("https://t.me/covid19push", "_blank")
+          props.ga.logEvent('telegram');
+        }}>
         Telegram 채널 구독
       </Button>
       <Card className={classes.card}>
@@ -222,6 +235,7 @@ function Home() {
           <ListItem alignItems="flex-start" button
             onClick={()=>{
               window.open(item.link, "_blank")
+              props.ga.logEvent('link',{link: item.link});
             }}>
           <ListItemText
             primary={item.title}
