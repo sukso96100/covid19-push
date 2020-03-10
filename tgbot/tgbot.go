@@ -7,11 +7,12 @@ import (
 	"github.com/sukso96100/covid19-push/database"
 )
 
-type TgChanBot struct{
-	Bot *tgbotapi.BotAPI
+type TgChanBot struct {
+	Bot     *tgbotapi.BotAPI
 	Channel string
-} 
-var botObj *TgChanBot 
+}
+
+var botObj *TgChanBot
 
 func InitTgBot(token string, channel string) error {
 	bot, err := tgbotapi.NewBotAPI(token)
@@ -19,7 +20,7 @@ func InitTgBot(token string, channel string) error {
 		return err
 	}
 	botObj = &TgChanBot{
-		Bot: bot,
+		Bot:     bot,
 		Channel: channel,
 	}
 	return nil
@@ -29,12 +30,17 @@ func Bot() *TgChanBot {
 	return botObj
 }
 
-func (bot *TgChanBot) SendStatMsg(prev database.StatData, current database.StatData) error {
+func (bot *TgChanBot) SendStatMsg(current database.StatData, incr map[string]string) error {
 	msgContent := fmt.Sprintf(
-		"코로나 19 발생 현황\n%s\nhttp://ncov.mohw.go.kr/bdBoardList_Real.do",
-		database.CreateStatMsg(prev, current))
+		"코로나 19 발생 현황\n%s\n",
+		database.CreateStatMsg(current, incr))
 
 	msg := tgbotapi.NewMessageToChannel(bot.Channel, msgContent)
+	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("발생현황 자세히 보기", "http://ncov.mohw.go.kr/index.jsp"),
+		),
+	)
 	if _, err := botObj.Bot.Send(msg); err != nil {
 		return err
 	}
@@ -43,9 +49,14 @@ func (bot *TgChanBot) SendStatMsg(prev database.StatData, current database.StatD
 
 func (bot *TgChanBot) SendNewsMsg(newsData database.NewsData) error {
 	msgContent := fmt.Sprintf(
-		"%s\n(담당부서: %s)\n%s",
-		newsData.Title, newsData.Department, newsData.Link)
+		"%s\n(담당부서: %s)",
+		newsData.Title, newsData.Department)
 	msg := tgbotapi.NewMessageToChannel(bot.Channel, msgContent)
+	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("자료 자세히 보기", newsData.Link),
+		),
+	)
 	if _, err := botObj.Bot.Send(msg); err != nil {
 		return err // Again, this is a bad way to handle errors.
 	}
