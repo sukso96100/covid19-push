@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -41,7 +42,7 @@ func collectStat() {
 		defer cancelFunc()
 		var content string
 		err := chromedp.Run(contextVar,
-			chromedp.Navigate(`http://ncov.mohw.go.kr/bdBoardList_Real.do?brdId=1&brdGubun=11`),
+			chromedp.Navigate(`http://ncov.mohw.go.kr/index.jsp`),
 			chromedp.WaitVisible(`body`, chromedp.ByQuery),
 			chromedp.Sleep(time.Second*3),
 			chromedp.InnerHTML(`body`, &content, chromedp.ByQuery),
@@ -55,34 +56,40 @@ func collectStat() {
 			log.Fatal(err)
 		}
 
-		items := doc.Find("table").Eq(0).Find("tr")
+		items := doc.Find("ul.liveNum").Eq(0).Find("li")
 		current := database.StatData{
-			Confirmed: convertToInt(items.Eq(0).Find("td").Text()),
-			Cured:     convertToInt(items.Eq(1).Find("td").Text()),
-			Death:     convertToInt(items.Eq(2).Find("td").Text()),
-			Checking:  convertToInt(items.Eq(3).Find("td").Text()),
+			Confirmed:      convertToInt(items.Eq(0).Find("span.num").Eq(0).Text()),
+			Cured:          convertToInt(items.Eq(1).Find("span.num").Eq(0).Text()),
+			Death:          convertToInt(items.Eq(3).Find("span.num").Eq(0).Text()),
+			Checking:       convertToInt(strings.Split(doc.Find("p.numinfo1 > span").Eq(1).Text(), "명")[0]),
+			Patients:       convertToInt(items.Eq(2).Find("span.num").Eq(0).Text()),
+			ResultNegative: convertToInt(strings.Split(doc.Find("p.numinfo3 > span").Eq(1).Text(), "명")[0]),
 		}
-		fmt.Println(items.Eq(0).Find("td").Text())
-		fmt.Println(convertToInt(items.Eq(0).Find("td").Text()))
 		if lastStat.Confirmed != current.Confirmed ||
 			lastStat.Cured != current.Cured ||
 			lastStat.Death != current.Death ||
-			lastStat.Checking != current.Checking {
+			lastStat.Checking != current.Checking ||
+			lastStat.Patients != current.Patients ||
+			lastStat.ResultNegative != current.ResultNegative {
 			fmt.Println("Sending new stat data")
+			increments := map[string]string{
+				"Confirmed": strings.ReplaceAll(items.Eq(0).Find("span").Eq(2).Text(), "전일대비", ""),
+				"Cured":     items.Eq(1).Find("span.before").Eq(0).Text(),
+				"Patients":  items.Eq(2).Find("span.before").Eq(0).Text(),
+				"Death":     items.Eq(3).Find("span.before").Eq(0).Text(),
+			}
 			current.Create()
-			fcm.GetFCMApp().PushStatData(
-				lastStat, current,
-			)
-			tgbot.Bot().SendStatMsg(lastStat, current)
+			fcm.GetFCMApp().PushStatData(current, increments)
+			tgbot.Bot().SendStatMsg(current, increments)
 		}
 	}
 }
 
 func convertToInt(str string) int {
-	r1 := strings.Split(str, "명")[0]
-	r2 := strings.ReplaceAll(r1, ",", "")
-	result, _ := strconv.Atoi(strings.TrimSpace(r2))
-	fmt.Println(r1, r2, result)
+	re := regexp.MustCompile("[0-9]+")
+	r2 := strings.ReplaceAll(str, ",", "")
+	nums := re.FindAllString(r2, -1)
+	result, _ := strconv.Atoi(nums[0])
 	return result
 }
 

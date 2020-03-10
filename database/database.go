@@ -25,6 +25,7 @@ func InitDatabase(dsn string) error {
 	// }
 	db, err := gorm.Open("sqlite3", dsn)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 	DbConn = db
@@ -37,10 +38,12 @@ func MigrateDb() {
 
 type StatData struct {
 	gorm.Model
-	Confirmed int
-	Cured     int
-	Death     int
-	Checking  int
+	Confirmed      int
+	Cured          int
+	Death          int
+	Checking       int
+	Patients       int
+	ResultNegative int
 }
 
 type NewsData struct {
@@ -77,37 +80,21 @@ func (d NewsData) Create() {
 	DbConn.Create((&d))
 }
 
-func CreateStatMsg(prev StatData, current StatData) string {
-	// See documentation on defining a message payload.
-	var confirmedIncSig string
-	var curedIncSig string
-	var deathIncSig string
-	var checkingIncSig string
-	if current.Confirmed-prev.Confirmed > 0 {
-		confirmedIncSig = fmt.Sprintf("+%d", current.Confirmed-prev.Confirmed)
-	} else {
-		confirmedIncSig = fmt.Sprintf("%d", current.Confirmed-prev.Confirmed)
-	}
-	if current.Cured-prev.Cured > 0 {
-		curedIncSig = fmt.Sprintf("+%d", current.Cured-prev.Cured)
-	} else {
-		curedIncSig = fmt.Sprintf("%d", current.Cured-prev.Cured)
-	}
-	if current.Death-prev.Death > 0 {
-		deathIncSig = fmt.Sprintf("+%d", current.Death-prev.Death)
-	} else {
-		deathIncSig = fmt.Sprintf("%d", current.Death-prev.Death)
-	}
-	if current.Checking-prev.Checking > 0 {
-		checkingIncSig = fmt.Sprintf("+%d", current.Checking-prev.Checking)
-	} else {
-		checkingIncSig = fmt.Sprintf("%d", current.Checking-prev.Checking)
-	}
-	tmpl := "확진:%d명 (%s), 완치:%d(%s), 사망:%d(%s), 검사진행:%d(%s)"
+func CreateStatMsg(current StatData, incr map[string]string) string {
+	tmpl := `환자 현황
+	- 완치(격리해제): %d %s
+	- 치료중(격리중): %d %s
+	- 사망: %d %s
+	- 합계(확진): %d %s
+	
+	검사 현황
+	- 검사중: %d
+	- 결과 음성: %d`
 	return fmt.Sprintf(tmpl,
-		current.Confirmed, confirmedIncSig,
-		current.Cured, curedIncSig,
-		current.Death, deathIncSig,
-		current.Checking, checkingIncSig,
+		current.Cured, incr["Cured"],
+		current.Patients, incr["Patients"],
+		current.Death, incr["Death"],
+		current.Confirmed, incr["Confirmed"],
+		current.Checking, current.ResultNegative,
 	)
 }

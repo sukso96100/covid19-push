@@ -46,18 +46,18 @@ func (fcm *FCMObject) Init(credential string) {
 	fcm.MsgClient = client
 }
 
-func (fcm *FCMObject) PushStatData(prev database.StatData, current database.StatData) {
+func (fcm *FCMObject) PushStatData(current database.StatData, incr map[string]string) {
 	message := &messaging.Message{
 		Notification: &messaging.Notification{
 			Title: "코로나19 발생 현황",
-			Body: database.CreateStatMsg(prev, current),
+			Body:  database.CreateStatMsg(current, incr),
 		},
 		Webpush: &messaging.WebpushConfig{
 			Notification: &messaging.WebpushNotification{
 				RequireInteraction: true,
 			},
 			FcmOptions: &messaging.WebpushFcmOptions{
-				Link: createNotificationUrl("http://ncov.mohw.go.kr/bdBoardList_Real.do"),
+				Link: createNotificationUrl("http://ncov.mohw.go.kr/index.jsp"),
 			},
 		},
 		Topic: "stat",
