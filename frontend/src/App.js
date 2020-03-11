@@ -206,11 +206,11 @@ function Home(props) {
         <div className={classes.stat}>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.patients}</Typography>
-              <b>치료중(격리중)</b>
+              <b>치료중<br/>(격리중)</b>
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.cured}</Typography>
-              <b>완치(격리해제)</b>
+              <b>완치<br/>(격리해제)</b>
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.death}</Typography>
@@ -218,7 +218,7 @@ function Home(props) {
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.confirmed}</Typography>
-              <b>합계(확진)</b>
+              <b>합계<br/>(확진)</b>
           </div>
       </div>
       <div className={classes.stat}>
