@@ -180,7 +180,7 @@ function Home(props) {
   }
   return (
     <div className={classes.root}>
-      <h1 class="title">코로나19 알리미</h1>
+      <h1 class="title">코로나19 푸시알리미</h1>
       
       <p>질병관리본부 코로나19 홈페이지에서 발생 동향과 새 공지사항을 푸시알림으로 알려드립니다.</p>
       <CompatInfo/>

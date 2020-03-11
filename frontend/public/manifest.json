@@ -1,6 +1,6 @@
 {
-  "short_name": "코로나19알리미",
-  "name": "코로나19 알리미",
+  "short_name": "코로나19푸시알리미",
+  "name": "코로나19 푸시알리미",
   "icons": [
     {
       "src": "favicon.ico",
