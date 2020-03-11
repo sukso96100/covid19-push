@@ -16,20 +16,19 @@
   - Firebase SDK
   - Web Push, Web Notification
   - Service Worker
+  - Google Analytics
 - 백엔드
   - Go
   - Echo
   - Firebase Admin SDK
   - Gorm
-  - MySQL
+  - SQLite
   - Chromedp
   - GoQuery
 - 서비스 운영/배포
-  - Google Cloud Platform
-    - Cloud Run
-    - Cloud Scheduler
-    - Cloud SQL
-  - Docker
+  - AWS EC2
+  - Docker(Swarm Mode)
+  - Caddy
 
 ## 프로젝트 관리
 한영빈 (sukso96100@gmail.com)
