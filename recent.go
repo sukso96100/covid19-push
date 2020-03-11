@@ -11,20 +11,22 @@ func CurrentStat(c echo.Context) error {
 	current := database.GetLastStat()
 	return c.JSON(http.StatusOK, map[string]int{
 		"confirmed": current.Confirmed,
-		"cured": current.Cured,
-		"death": current.Death,
-		"checking": current.Checking,
+		"cured":     current.Cured,
+		"death":     current.Death,
+		"checking":  current.Checking,
+		"patients":  current.Patients,
+		"resultNeg": current.ResultNegative,
 	})
 }
 
-func RecentNews(c echo.Context) error{
+func RecentNews(c echo.Context) error {
 	recent := database.GetRecentNews()
 	result := []map[string]string{}
-	for _,item := range recent {
+	for _, item := range recent {
 		result = append(result, map[string]string{
-			"title":item.Title,
-			"dept":item.Department,
-			"link":item.Link,
+			"title": item.Title,
+			"dept":  item.Department,
+			"link":  item.Link,
 		})
 	}
 	return c.JSON(http.StatusOK, result)

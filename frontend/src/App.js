@@ -39,7 +39,8 @@ const useStyles = makeStyles({
   },
   stat: {
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    marginTop: '16px',
   },
   statitem: {
     flex:1,
@@ -95,7 +96,7 @@ function Home(props) {
   const [snackbar, setSnackbar] = React.useState(false);
   const [snackMsg, setSnackMsg] = React.useState('');
   const [statData, setStatData] = useState({
-    confirmed:0, cured:0, death:0, checking:0
+    confirmed:0, cured:0, death:0, checking:0, patients:0, resultNeg:0
   })
   let [newsData, setNewsData] = useState([])
   useEffect(()=>{
@@ -204,20 +205,28 @@ function Home(props) {
         </Typography>
         <div className={classes.stat}>
           <div className={classes.statitem}>
-              <Typography variant="h5" component="h2">{statData.confirmed}</Typography>
-              <b>확진</b>
+              <Typography variant="h5" component="h2">{statData.patients}</Typography>
+              <b>치료중(격리중)</b>
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.cured}</Typography>
-              <b>완치</b>
+              <b>완치(격리해제)</b>
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.death}</Typography>
               <b>사망</b>
           </div>
           <div className={classes.statitem}>
-              <Typography variant="h5" component="h2">{statData.checking}</Typography>
-              <b>검사진행</b>
+              <Typography variant="h5" component="h2">{statData.confirmed}</Typography>
+              <b>합계(확진)</b>
+          </div>
+      </div>
+      <div className={classes.stat}>
+          <div className={classes.statitem}>
+            <span>검사중(검사진행) <b>{statData.checking}</b></span>
+          </div>
+          <div className={classes.statitem}>
+            <span>결과음성 <b>{statData.resultNeg}</b></span>
           </div>
       </div>
       </CardContent>
