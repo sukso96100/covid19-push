@@ -12,6 +12,16 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Docker 이미지 빌드
+      env:
+        REACT_APP_FIREBASE_APIKEY: ${{ secrets.FBASE_APIKEY }}
+        REACT_APP_FIREBASE_AUTHDOMAIN: ${{ secrets.FBASE_AUTHDOMAIN }}
+        REACT_APP_FIREBASE_DBURL: ${{ secrets.FBASE_DBURL }}
+        REACT_APP_FIREBASE_PROJID: ${{ secrets.FBASE_PROJID }}
+        REACT_APP_FIREBASE_BUCKET: ${{ secrets.FBASE_BUCKET }}
+        REACT_APP_FIREBASE_SENDERID: ${{ secrets.FBASE_SENDERID }}
+        REACT_APP_FIREBASE_APPID: ${{ secrets.FBASE_APPID }}
+        REACT_APP_FIREBASE_ANALYTICS: ${{ secrets.FBASE_ANALYTICS }}
+        REACT_APP_FIREBASE_VAPIDKEY: ${{ secrets.FBASE_VAPIDKEY }}
       run: docker build . --file Dockerfile --tag docker.pkg.github.com/sukso96100/covid19-push/app:$(echo $GITHUB_REF | cut -d'/' -f 3)-${GITHUB_SHA:0:7}
 
     - name: Docker 레지스트리에 로그인
