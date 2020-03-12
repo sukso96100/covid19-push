@@ -49,7 +49,7 @@ const useStyles = makeStyles({
     alignItems: 'center'
   },
   ststdata: {
-    fontSize: '64'
+    fontSize: '56'
   },
   card:{
     margin: '8px'
@@ -206,11 +206,11 @@ function Home(props) {
         <div className={classes.stat}>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.patients}</Typography>
-              <b>치료중<br/>(격리중)</b>
+              <b>격리중</b>
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.cured}</Typography>
-              <b>완치<br/>(격리해제)</b>
+              <b>격리해제</b>
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.death}</Typography>
@@ -218,12 +218,12 @@ function Home(props) {
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.confirmed}</Typography>
-              <b>합계<br/>(확진)</b>
+              <b>확진합계</b>
           </div>
       </div>
       <div className={classes.stat}>
           <div className={classes.statitem}>
-            <span>검사중(검사진행) <b>{statData.checking}</b></span>
+            <span>검사중 <b>{statData.checking}</b></span>
           </div>
           <div className={classes.statitem}>
             <span>결과음성 <b>{statData.resultNeg}</b></span>
