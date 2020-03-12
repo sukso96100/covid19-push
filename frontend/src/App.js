@@ -192,7 +192,7 @@ function Home(props) {
         구독 해제
       </Button>
       <Button variant="outlined" color="primary" className={classes.subBtns}
-        onCliek={()=>{
+        onClick={()=>{
           window.open("https://t.me/covid19push", "_blank")
           analytics.logEvent('telegram');
         }}>
