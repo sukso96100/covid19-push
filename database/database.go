@@ -81,15 +81,13 @@ func (d NewsData) Create() {
 }
 
 func CreateStatMsg(current StatData, incr map[string]string) string {
-	tmpl := `환자 현황
-	- 완치(격리해제): %d %s
-	- 치료중(격리중): %d %s
-	- 사망: %d %s
-	- 합계(확진): %d %s
+	tmpl := `
+	환자 현황
+	격리해제: %d %s | 격리중: %d %s
+	사망: %d %s | 합계(확진): %d %s
 	
 	검사 현황
-	- 검사중: %d
-	- 결과 음성: %d`
+	검사중: %d | 결과 음성: %d`
 	return fmt.Sprintf(tmpl,
 		current.Cured, incr["Cured"],
 		current.Patients, incr["Patients"],
