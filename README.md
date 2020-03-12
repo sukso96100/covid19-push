@@ -7,6 +7,8 @@
 > 웹 푸시알림을 구독하려면 Service Worker, Web Push, Web Notification 사용 가능한 웹 브라우저가 필요합니다.
 > Telegram 채널을 통해서도 알림을 받아보실 수 있습니다.
 
+![](preview.jpg)
+
 ## 프론트엔드 테스트/빌드
 ```bash
 cd frontend
