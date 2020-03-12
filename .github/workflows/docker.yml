@@ -24,10 +24,10 @@ jobs:
         REACT_APP_FIREBASE_VAPIDKEY: ${{ secrets.FBASE_VAPIDKEY }}
       run: |
         docker build --build-arg REACT_APP_FIREBASE_APIKEY \
-        REACT_APP_FIREBASE_AUTHDOMAIN REACT_APP_FIREBASE_DBURL \
-        REACT_APP_FIREBASE_PROJID REACT_APP_FIREBASE_BUCKET \
-        REACT_APP_FIREBASE_SENDERID REACT_APP_FIREBASE_APPID \
-        REACT_APP_FIREBASE_ANALYTICS REACT_APP_FIREBASE_VAPIDKEY \
+        --build-arg REACT_APP_FIREBASE_AUTHDOMAIN --build-arg REACT_APP_FIREBASE_DBURL \
+        --build-arg REACT_APP_FIREBASE_PROJID --build-arg REACT_APP_FIREBASE_BUCKET \
+        --build-arg REACT_APP_FIREBASE_SENDERID --build-arg REACT_APP_FIREBASE_APPID \
+        --build-arg REACT_APP_FIREBASE_ANALYTICS --build-arg REACT_APP_FIREBASE_VAPIDKEY \
         --file Dockerfile --tag docker.pkg.github.com/sukso96100/covid19-push/app:$(echo $GITHUB_REF | cut -d'/' -f 3)-${GITHUB_SHA:0:7} .
 
     - name: Docker 레지스트리에 로그인
