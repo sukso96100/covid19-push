@@ -96,7 +96,8 @@ function Home(props) {
   const [snackbar, setSnackbar] = React.useState(false);
   const [snackMsg, setSnackMsg] = React.useState('');
   const [statData, setStatData] = useState({
-    confirmed:0, cured:0, death:0, checking:0, patients:0, resultNeg:0
+    confirmed:0, cured:0, death:0, checking:0, patients:0, resultNeg:0,
+    confirmedIncr: "", curedIncr: "", deathIncr: "", patientsIncr: ""
   })
   let [newsData, setNewsData] = useState([])
   useEffect(()=>{
@@ -206,18 +207,22 @@ function Home(props) {
         <div className={classes.stat}>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.patients}</Typography>
+              <Typography variant="h7" component="h4">{statData.patientsIncr}</Typography>
               <b>격리중</b>
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.cured}</Typography>
+              <Typography variant="h7" component="h4">{statData.curedIncr}</Typography>
               <b>격리해제</b>
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.death}</Typography>
+              <Typography variant="h7" component="h4">{statData.deathIncr}</Typography>
               <b>사망</b>
           </div>
           <div className={classes.statitem}>
               <Typography variant="h5" component="h2">{statData.confirmed}</Typography>
+              <Typography variant="h7" component="h4">{statData.confirmedIncr}</Typography>
               <b>확진합계</b>
           </div>
       </div>
