@@ -9,13 +9,17 @@ import (
 
 func CurrentStat(c echo.Context) error {
 	current := database.GetLastStat()
-	return c.JSON(http.StatusOK, map[string]int{
-		"confirmed": current.Confirmed,
-		"cured":     current.Cured,
-		"death":     current.Death,
-		"checking":  current.Checking,
-		"patients":  current.Patients,
-		"resultNeg": current.ResultNegative,
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"confirmed":     current.Confirmed,
+		"confirmedIncr": current.ConfirmedIncr,
+		"cured":         current.Cured,
+		"curedIncr":     current.CuredIncr,
+		"death":         current.Death,
+		"deathIncr":     current.DeathIncr,
+		"checking":      current.Checking,
+		"patients":      current.Patients,
+		"patientsIncr":  current.PatientsIncr,
+		"resultNeg":     current.ResultNegative,
 	})
 }
 

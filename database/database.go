@@ -40,10 +40,14 @@ func MigrateDb() {
 type StatData struct {
 	gorm.Model
 	Confirmed      int
+	ConfirmedIncr  string
 	Cured          int
+	CuredIncr      string
 	Death          int
+	DeathIncr      string
 	Checking       int
 	Patients       int
+	PatientsIncr   string
 	ResultNegative int
 }
 
@@ -81,17 +85,17 @@ func (d NewsData) Create() {
 	DbConn.Create((&d))
 }
 
-func CreateStatMsg(current StatData, incr map[string]string) string {
+func CreateStatMsg(current StatData) string {
 	var builder strings.Builder
 	builder.WriteString("환자현황 - 격리해제: %d %s, 격리중: %d %s,\n")
 	builder.WriteString("사망: %d %s, 확진합계: %d %s\n")
 	builder.WriteString("검사현황 - 검사중: %d, 결과음성: %d")
 
 	return fmt.Sprintf(builder.String(),
-		current.Cured, incr["Cured"],
-		current.Patients, incr["Patients"],
-		current.Death, incr["Death"],
-		current.Confirmed, incr["Confirmed"],
+		current.Cured, current.CuredIncr,
+		current.Patients, current.PatientsIncr,
+		current.Death, current.DeathIncr,
+		current.Confirmed, current.ConfirmedIncr,
 		current.Checking, current.ResultNegative,
 	)
 }

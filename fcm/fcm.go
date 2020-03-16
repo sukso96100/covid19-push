@@ -46,11 +46,11 @@ func (fcm *FCMObject) Init(credential string) {
 	fcm.MsgClient = client
 }
 
-func (fcm *FCMObject) PushStatData(current database.StatData, incr map[string]string) {
+func (fcm *FCMObject) PushStatData(current database.StatData) {
 	message := &messaging.Message{
 		Notification: &messaging.Notification{
 			Title: "코로나19 발생 현황",
-			Body:  database.CreateStatMsg(current, incr),
+			Body:  database.CreateStatMsg(current),
 		},
 		Webpush: &messaging.WebpushConfig{
 			Notification: &messaging.WebpushNotification{

@@ -59,10 +59,14 @@ func collectStat() {
 		items := doc.Find("ul.liveNum").Eq(0).Find("li")
 		current := database.StatData{
 			Confirmed:      convertToInt(items.Eq(0).Find("span.num").Eq(0).Text()),
+			ConfirmedIncr:  strings.ReplaceAll(items.Eq(0).Find("span").Eq(2).Text(), "전일대비", ""),
 			Cured:          convertToInt(items.Eq(1).Find("span.num").Eq(0).Text()),
+			CuredIncr:      items.Eq(1).Find("span.before").Eq(0).Text(),
 			Death:          convertToInt(items.Eq(3).Find("span.num").Eq(0).Text()),
+			DeathIncr:      items.Eq(3).Find("span.before").Eq(0).Text(),
 			Checking:       convertToInt(strings.Split(doc.Find("p.numinfo1 > span").Eq(1).Text(), "명")[0]),
 			Patients:       convertToInt(items.Eq(2).Find("span.num").Eq(0).Text()),
+			PatientsIncr:   items.Eq(2).Find("span.before").Eq(0).Text(),
 			ResultNegative: convertToInt(strings.Split(doc.Find("p.numinfo3 > span").Eq(1).Text(), "명")[0]),
 		}
 		if lastStat.Confirmed != current.Confirmed ||
@@ -72,15 +76,9 @@ func collectStat() {
 			lastStat.Patients != current.Patients ||
 			lastStat.ResultNegative != current.ResultNegative {
 			fmt.Println("Sending new stat data")
-			increments := map[string]string{
-				"Confirmed": strings.ReplaceAll(items.Eq(0).Find("span").Eq(2).Text(), "전일대비", ""),
-				"Cured":     items.Eq(1).Find("span.before").Eq(0).Text(),
-				"Patients":  items.Eq(2).Find("span.before").Eq(0).Text(),
-				"Death":     items.Eq(3).Find("span.before").Eq(0).Text(),
-			}
 			current.Create()
-			fcm.GetFCMApp().PushStatData(current, increments)
-			tgbot.Bot().SendStatMsg(current, increments)
+			fcm.GetFCMApp().PushStatData(current)
+			tgbot.Bot().SendStatMsg(current)
 		}
 	}
 }

@@ -30,10 +30,10 @@ func Bot() *TgChanBot {
 	return botObj
 }
 
-func (bot *TgChanBot) SendStatMsg(current database.StatData, incr map[string]string) error {
+func (bot *TgChanBot) SendStatMsg(current database.StatData) error {
 	msgContent := fmt.Sprintf(
 		"코로나 19 발생 현황\n%s\n",
-		database.CreateStatMsg(current, incr))
+		database.CreateStatMsg(current))
 
 	msg := tgbotapi.NewMessageToChannel(bot.Channel, msgContent)
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
