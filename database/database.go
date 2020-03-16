@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -81,14 +82,12 @@ func (d NewsData) Create() {
 }
 
 func CreateStatMsg(current StatData, incr map[string]string) string {
-	tmpl := `
-	환자 현황
-	격리해제: %d %s | 격리중: %d %s
-	사망: %d %s | 합계(확진): %d %s
-	
-	검사 현황
-	검사중: %d | 결과 음성: %d`
-	return fmt.Sprintf(tmpl,
+	var builder strings.Builder
+	builder.WriteString("환자현황 - 격리해제: %d %s, 격리중: %d %s,\n")
+	builder.WriteString("사망: %d %s, 확진합계: %d %s\n")
+	builder.WriteString("검사현황 - 검사중: %d, 결과음성: %d")
+
+	return fmt.Sprintf(builder.String(),
 		current.Cured, incr["Cured"],
 		current.Patients, incr["Patients"],
 		current.Death, incr["Death"],
