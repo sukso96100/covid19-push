@@ -87,7 +87,7 @@ func (d NewsData) Create() {
 
 func CreateStatMsg(current StatData) string {
 	var builder strings.Builder
-	builder.WriteString("환자현황 - 격리해제: %d %s, 격리중: %d %s,\n")
+	builder.WriteString("환자현황 - 격리해제: %d %s, 격리중: %d %s, ")
 	builder.WriteString("사망: %d %s, 확진합계: %d %s\n")
 	builder.WriteString("검사현황 - 검사중: %d, 결과음성: %d")
 
